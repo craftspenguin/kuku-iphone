@@ -35,6 +35,17 @@
 <body>
   <main aria-label="九九チャレンジ">
     <div class="topline"><strong>九九チャレンジ</strong><span class="score" id="score">0 問中 0 問正解</span></div>
+<div class="status">
+    <div>❤️ <span id="life">3</span></div>
+    <div>⭐ <span id="point">0</span></div>
+</div>
+
+<div class="penta" id="penta">🐧</div>
+
+<div class="status">
+    <div class="combo">🔥 <span id="combo">0</span> Combo</div>
+    <div class="highscore">🏆 <span id="high">0</span></div>
+</div>
     <div class="progress" aria-label="10問中の進捗"><span id="bar"></span></div>
     <section class="problem" aria-live="polite">
       <div class="equation" id="question">3 × 4</div>
@@ -64,3 +75,30 @@
   </script>
 </body>
 </html>
+.status{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  font-size:22px;
+}
+
+.penta{
+  font-size:64px;
+  text-align:center;
+  animation:bounce 1.2s infinite;
+}
+
+@keyframes bounce{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-8px);}
+}
+
+.combo{
+  color:#ff6600;
+  font-weight:bold;
+}
+
+.highscore{
+  color:#ffaa00;
+}
