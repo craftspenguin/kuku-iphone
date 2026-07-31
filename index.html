@@ -16,6 +16,7 @@
     .topline { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
     .title { font-size: 20px; }
     .score { color: #65708e; font-size: 14px; font-variant-numeric: tabular-nums; }
+    .points { color: var(--main); font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; }
     .mode { padding: 14px; border: 1px solid var(--line); border-radius: 18px; background: var(--card); }
     .mode-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 15px; font-weight: 700; }
     .mode-title span { color: #687391; font-size: 12px; font-weight: 500; }
@@ -42,7 +43,8 @@
 </head>
 <body>
   <main aria-label="九九ゲームDX">
-    <div class="topline"><strong class="title">九九ゲームDX</strong><span class="score" id="score">0問中 0問正解</span></div>
+    <div class="topline"><strong class="title">九九ゲームDX</strong><span class="points" id="points">0点</span></div>
+    <div class="score" id="score">0問中 0問正解</div>
 
     <section class="mode" aria-labelledby="mode-title">
       <div class="mode-title" id="mode-title">どの段であそぶ？ <span id="selected-mode">全部の段</span></div>
@@ -80,14 +82,15 @@
     const answer = document.querySelector('#answer');
     const feedback = document.querySelector('#feedback');
     const score = document.querySelector('#score');
+    const points = document.querySelector('#points');
     const bar = document.querySelector('#bar');
     const selectedMode = document.querySelector('#selected-mode');
     const stageLabel = document.querySelector('#stage-label');
-    let left, right, entry = '', total = 0, correct = 0, locked = false, selectedTable = 'all';
+    let left, right, entry = '', total = 0, correct = 0, point = 0, locked = false, selectedTable = 'all';
 
     function tableName() { return selectedTable === 'all' ? '全部の段' : `${selectedTable}の段`; }
     function renderEntry() { answer.textContent = entry || '−'; answer.classList.toggle('has-value', Boolean(entry)); }
-    function renderScore() { score.textContent = `${total}問中 ${correct}問正解`; bar.style.width = `${Math.min(total, 10) * 10}%`; }
+    function renderScore() { score.textContent = `${total}問中 ${correct}問正解`; points.textContent = `${point}点`; bar.style.width = `${Math.min(total, 10) * 10}%`; }
     function next() {
       left = selectedTable === 'all' ? Math.floor(Math.random() * 9) + 1 : Number(selectedTable);
       right = Math.floor(Math.random() * 9) + 1;
@@ -97,11 +100,11 @@
       feedback.textContent = ''; feedback.className = 'feedback';
       renderEntry();
     }
-    function resetGame() { total = 0; correct = 0; renderScore(); next(); }
+    function resetGame() { total = 0; correct = 0; point = 0; renderScore(); next(); }
     function check() {
       if (locked || !entry) return;
       locked = true; total++;
-      if (Number(entry) === left * right) { correct++; feedback.textContent = 'せいかい！'; feedback.className = 'feedback ok'; }
+      if (Number(entry) === left * right) { correct++; point += 10; feedback.textContent = 'せいかい！ +10点'; feedback.className = 'feedback ok'; }
       else { feedback.textContent = `おしい！ こたえは ${left * right}`; feedback.className = 'feedback ng'; }
       renderScore(); setTimeout(next, 850);
     }
