@@ -23,6 +23,8 @@
     .highscore { color: #9b6d21; font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; }
     .voice-status { min-height: 20px; text-align: center; color: #69769a; font-size: 13px; font-weight: 700; }
     .voice-status.listening { color: var(--main); }
+    .coin-bank { display: flex; justify-content: center; align-items: center; gap: 6px; color: #a46e08; font-size: 18px; font-weight: 800; }
+    .coin-bank span { color: #c78500; font-variant-numeric: tabular-nums; }
     .mode { padding: 14px; border: 1px solid var(--line); border-radius: 18px; background: var(--card); }
     .mode-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 15px; font-weight: 700; }
     .mode-title span { color: #687391; font-size: 12px; font-weight: 500; }
@@ -83,6 +85,7 @@
       <button type="button" data-key="clear" aria-label="入力を消す">消す</button><button type="button" data-key="0">0</button><button type="button" data-key="back" aria-label="一文字消す">戻る</button>
     </div>
     <div class="actions"><button type="button" class="submit" id="check">こたえる</button><button type="button" class="reset" id="reset">はじめから</button></div>
+    <div class="coin-bank" aria-label="コイン"><span aria-hidden="true">🪙</span> コイン <span id="coins">0</span></div>
   </main>
   <script>
     const question = document.querySelector('#question');
@@ -94,13 +97,16 @@
     const comboLabel = document.querySelector('#combo');
     const highScoreLabel = document.querySelector('#high-score');
     const voiceStatus = document.querySelector('#voice-status');
+    const coinsLabel = document.querySelector('#coins');
     const HIGH_SCORE_KEY = 'kuku-dx-high-score';
+    const COINS_KEY = 'kuku-dx-coins';
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const bar = document.querySelector('#bar');
     const selectedMode = document.querySelector('#selected-mode');
     const stageLabel = document.querySelector('#stage-label');
     let left, right, entry = '', total = 0, correct = 0, point = 0, combo = 0, life = 3, locked = false, gameOver = false, selectedTable = 'all';
     let highScore = Number(localStorage.getItem(HIGH_SCORE_KEY)) || 0;
+    let coins = Number(localStorage.getItem(COINS_KEY)) || 0;
     let recognition = null, isListening = false, restartTimer = null, speechToken = 0;
 
     function tableName() { return selectedTable === 'all' ? '全部の段' : `${selectedTable}の段`; }
@@ -110,6 +116,7 @@
       points.textContent = `${point}点`;
       comboLabel.textContent = `${combo}コンボ`;
       highScoreLabel.textContent = highScore;
+      coinsLabel.textContent = coins;
       lives.textContent = '♥ '.repeat(life).trim() || '♥ 0';
       lives.setAttribute('aria-label', `ライフ ${life}`);
       bar.style.width = `${Math.min(total, 10) * 10}%`;
@@ -198,9 +205,9 @@
       locked = true; total++;
       stopListening();
       if (Number(entry) === left * right) {
-        correct++; point += 10; combo++;
+        correct++; point += 10; combo++; coins++; localStorage.setItem(COINS_KEY, coins);
         if (point > highScore) { highScore = point; localStorage.setItem(HIGH_SCORE_KEY, highScore); }
-        feedback.textContent = combo > 1 ? `せいかい！ +10点　${combo}コンボ！` : 'せいかい！ +10点';
+        feedback.textContent = combo > 1 ? `せいかい！ +10点・+1コイン　${combo}コンボ！` : 'せいかい！ +10点・+1コイン';
         feedback.className = 'feedback ok';
       }
       else {
