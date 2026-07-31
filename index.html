@@ -21,6 +21,8 @@
     .game-stats { display: flex; justify-content: space-between; align-items: center; }
     .combo { color: #ef7a31; font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; }
     .highscore { color: #9b6d21; font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .voice-status { min-height: 20px; text-align: center; color: #69769a; font-size: 13px; font-weight: 700; }
+    .voice-status.listening { color: var(--main); }
     .mode { padding: 14px; border: 1px solid var(--line); border-radius: 18px; background: var(--card); }
     .mode-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 15px; font-weight: 700; }
     .mode-title span { color: #687391; font-size: 12px; font-weight: 500; }
@@ -73,6 +75,7 @@
       <div class="answer" id="answer" aria-label="入力した答え">−</div>
       <div class="feedback" id="feedback"></div>
     </section>
+    <div class="voice-status" id="voice-status" aria-live="polite">音声認識を準備中…</div>
     <div class="keypad" aria-label="答えをタップで入力">
       <button type="button" data-key="1">1</button><button type="button" data-key="2">2</button><button type="button" data-key="3">3</button>
       <button type="button" data-key="4">4</button><button type="button" data-key="5">5</button><button type="button" data-key="6">6</button>
@@ -90,12 +93,15 @@
     const lives = document.querySelector('#lives');
     const comboLabel = document.querySelector('#combo');
     const highScoreLabel = document.querySelector('#high-score');
+    const voiceStatus = document.querySelector('#voice-status');
     const HIGH_SCORE_KEY = 'kuku-dx-high-score';
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const bar = document.querySelector('#bar');
     const selectedMode = document.querySelector('#selected-mode');
     const stageLabel = document.querySelector('#stage-label');
     let left, right, entry = '', total = 0, correct = 0, point = 0, combo = 0, life = 3, locked = false, gameOver = false, selectedTable = 'all';
     let highScore = Number(localStorage.getItem(HIGH_SCORE_KEY)) || 0;
+    let recognition = null, isListening = false, restartTimer = null;
 
     function tableName() { return selectedTable === 'all' ? '全部の段' : `${selectedTable}の段`; }
     function renderEntry() { answer.textContent = entry || '−'; answer.classList.toggle('has-value', Boolean(entry)); }
@@ -108,6 +114,57 @@
       lives.setAttribute('aria-label', `ライフ ${life}`);
       bar.style.width = `${Math.min(total, 10) * 10}%`;
     }
+    function setVoiceStatus(message, listening = false) { voiceStatus.textContent = message; voiceStatus.classList.toggle('listening', listening); }
+    function spokenNumberToValue(transcript) {
+      const normalized = transcript.toLowerCase().replace(/[\s、。,.]/g, '').replace(/^(こたえは|答えは)/, '').replace(/[０-９]/g, char => String.fromCharCode(char.charCodeAt(0) - 0xfee0));
+      const digits = normalized.match(/\d{1,2}/);
+      if (digits) return Number(digits[0]);
+      const kanji = { '〇': 0, '零': 0, '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9 };
+      if (/^[〇零一二三四五六七八九十]+$/.test(normalized)) {
+        const [before, after] = normalized.split('十');
+        if (normalized.includes('十')) return (before ? kanji[before] : 1) * 10 + (after ? kanji[after] : 0);
+        return kanji[normalized];
+      }
+      const units = { 'ぜろ': 0, 'れい': 0, 'いち': 1, 'に': 2, 'さん': 3, 'よん': 4, 'し': 4, 'ご': 5, 'ろく': 6, 'なな': 7, 'しち': 7, 'はち': 8, 'きゅう': 9, 'く': 9 };
+      if (Object.hasOwn(units, normalized)) return units[normalized];
+      const tens = [['きゅうじゅう', 90], ['はちじゅう', 80], ['ななじゅう', 70], ['しちじゅう', 70], ['ろくじゅう', 60], ['ごじゅう', 50], ['よんじゅう', 40], ['しじゅう', 40], ['さんじゅう', 30], ['にじゅう', 20], ['じゅう', 10]];
+      for (const [word, value] of tens) {
+        if (normalized.startsWith(word)) {
+          const remainder = normalized.slice(word.length);
+          if (!remainder) return value;
+          if (Object.hasOwn(units, remainder)) return value + units[remainder];
+        }
+      }
+      return null;
+    }
+    function scheduleListening() {
+      clearTimeout(restartTimer);
+      restartTimer = setTimeout(startListening, 500);
+    }
+    function setupRecognition() {
+      if (!SpeechRecognition) { setVoiceStatus('このブラウザでは音声認識を使えません。テンキーで答えよう。'); return; }
+      recognition = new SpeechRecognition();
+      recognition.lang = 'ja-JP'; recognition.interimResults = false; recognition.continuous = false; recognition.maxAlternatives = 1;
+      recognition.onresult = event => {
+        isListening = false;
+        const value = spokenNumberToValue(event.results[0][0].transcript);
+        if (value === null || value > 81) { setVoiceStatus('数字を聞き取れなかったよ。もういちど話してね。'); scheduleListening(); return; }
+        entry = String(value); renderEntry(); setVoiceStatus(`「${value}」と聞こえたよ！`); check();
+      };
+      recognition.onerror = event => {
+        isListening = false;
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') setVoiceStatus('マイクを許可すると、声で答えられるよ。');
+        else if (!locked && !gameOver) { setVoiceStatus('もういちど答えを話してね。'); scheduleListening(); }
+      };
+      recognition.onend = () => { isListening = false; if (!locked && !gameOver && voiceStatus.classList.contains('listening')) scheduleListening(); };
+    }
+    function startListening() {
+      if (!SpeechRecognition || locked || gameOver || isListening) return;
+      if (!recognition) setupRecognition();
+      if (!recognition) return;
+      try { recognition.start(); isListening = true; setVoiceStatus('🎤 こたえを話してね', true); } catch { /* recognition is already starting */ }
+    }
+    function stopListening() { clearTimeout(restartTimer); if (recognition && isListening) recognition.stop(); isListening = false; }
     function next() {
       left = selectedTable === 'all' ? Math.floor(Math.random() * 9) + 1 : Number(selectedTable);
       right = Math.floor(Math.random() * 9) + 1;
@@ -116,11 +173,13 @@
       stageLabel.textContent = tableName();
       feedback.textContent = ''; feedback.className = 'feedback';
       renderEntry();
+      startListening();
     }
-    function resetGame() { total = 0; correct = 0; point = 0; combo = 0; life = 3; gameOver = false; renderScore(); next(); }
+    function resetGame() { stopListening(); total = 0; correct = 0; point = 0; combo = 0; life = 3; gameOver = false; renderScore(); next(); }
     function check() {
       if (locked || gameOver || !entry) return;
       locked = true; total++;
+      stopListening();
       if (Number(entry) === left * right) {
         correct++; point += 10; combo++;
         if (point > highScore) { highScore = point; localStorage.setItem(HIGH_SCORE_KEY, highScore); }
