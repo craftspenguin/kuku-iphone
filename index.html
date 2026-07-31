@@ -20,6 +20,7 @@
     .lives { color: #e45c61; font-size: 18px; font-weight: 800; letter-spacing: .08em; }
     .game-stats { display: flex; justify-content: space-between; align-items: center; }
     .combo { color: #ef7a31; font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .highscore { color: #9b6d21; font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; }
     .mode { padding: 14px; border: 1px solid var(--line); border-radius: 18px; background: var(--card); }
     .mode-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 15px; font-weight: 700; }
     .mode-title span { color: #687391; font-size: 12px; font-weight: 500; }
@@ -47,7 +48,7 @@
 <body>
   <main aria-label="九九ゲームDX">
     <div class="topline"><strong class="title">九九ゲームDX</strong><span class="lives" id="lives" aria-label="ライフ 3">♥ ♥ ♥</span><span class="points" id="points">0点</span></div>
-    <div class="game-stats"><span class="score" id="score">0問中 0問正解</span><span class="combo" id="combo">0コンボ</span></div>
+    <div class="game-stats"><span class="score" id="score">0問中 0問正解</span><span class="combo" id="combo">0コンボ</span><span class="highscore">最高 <span id="high-score">0</span>点</span></div>
 
     <section class="mode" aria-labelledby="mode-title">
       <div class="mode-title" id="mode-title">どの段であそぶ？ <span id="selected-mode">全部の段</span></div>
@@ -88,10 +89,13 @@
     const points = document.querySelector('#points');
     const lives = document.querySelector('#lives');
     const comboLabel = document.querySelector('#combo');
+    const highScoreLabel = document.querySelector('#high-score');
+    const HIGH_SCORE_KEY = 'kuku-dx-high-score';
     const bar = document.querySelector('#bar');
     const selectedMode = document.querySelector('#selected-mode');
     const stageLabel = document.querySelector('#stage-label');
     let left, right, entry = '', total = 0, correct = 0, point = 0, combo = 0, life = 3, locked = false, gameOver = false, selectedTable = 'all';
+    let highScore = Number(localStorage.getItem(HIGH_SCORE_KEY)) || 0;
 
     function tableName() { return selectedTable === 'all' ? '全部の段' : `${selectedTable}の段`; }
     function renderEntry() { answer.textContent = entry || '−'; answer.classList.toggle('has-value', Boolean(entry)); }
@@ -99,6 +103,7 @@
       score.textContent = `${total}問中 ${correct}問正解`;
       points.textContent = `${point}点`;
       comboLabel.textContent = `${combo}コンボ`;
+      highScoreLabel.textContent = highScore;
       lives.textContent = '♥ '.repeat(life).trim() || '♥ 0';
       lives.setAttribute('aria-label', `ライフ ${life}`);
       bar.style.width = `${Math.min(total, 10) * 10}%`;
@@ -118,6 +123,7 @@
       locked = true; total++;
       if (Number(entry) === left * right) {
         correct++; point += 10; combo++;
+        if (point > highScore) { highScore = point; localStorage.setItem(HIGH_SCORE_KEY, highScore); }
         feedback.textContent = combo > 1 ? `せいかい！ +10点　${combo}コンボ！` : 'せいかい！ +10点';
         feedback.className = 'feedback ok';
       }
