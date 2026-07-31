@@ -25,6 +25,9 @@
     .voice-status.listening { color: var(--main); }
     .coin-bank { display: flex; justify-content: center; align-items: center; gap: 6px; color: #a46e08; font-size: 18px; font-weight: 800; }
     .coin-bank span { color: #c78500; font-variant-numeric: tabular-nums; }
+    .level-status { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; color: #6a5cc6; font-size: 13px; font-weight: 800; }
+    .xp-bar { height: 8px; overflow: hidden; border-radius: 99px; background: #e3e0fa; }
+    .xp-bar span { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, #9f7aea, #6366f1); transition: width .25s ease; }
     .mode { padding: 14px; border: 1px solid var(--line); border-radius: 18px; background: var(--card); }
     .mode-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 15px; font-weight: 700; }
     .mode-title span { color: #687391; font-size: 12px; font-weight: 500; }
@@ -53,6 +56,7 @@
   <main aria-label="九九ゲームDX">
     <div class="topline"><strong class="title">九九ゲームDX</strong><span class="lives" id="lives" aria-label="ライフ 3">♥ ♥ ♥</span><span class="points" id="points">0点</span></div>
     <div class="game-stats"><span class="score" id="score">0問中 0問正解</span><span class="combo" id="combo">0コンボ</span><span class="highscore">最高 <span id="high-score">0</span>点</span></div>
+    <div class="level-status"><span id="level">Lv.1</span><div class="xp-bar" aria-label="経験値"><span id="xp-bar"></span></div><span id="xp">0 / 100 EXP</span></div>
 
     <section class="mode" aria-labelledby="mode-title">
       <div class="mode-title" id="mode-title">どの段であそぶ？ <span id="selected-mode">全部の段</span></div>
@@ -98,8 +102,13 @@
     const highScoreLabel = document.querySelector('#high-score');
     const voiceStatus = document.querySelector('#voice-status');
     const coinsLabel = document.querySelector('#coins');
+    const levelLabel = document.querySelector('#level');
+    const xpLabel = document.querySelector('#xp');
+    const xpBar = document.querySelector('#xp-bar');
     const HIGH_SCORE_KEY = 'kuku-dx-high-score';
     const COINS_KEY = 'kuku-dx-coins';
+    const LEVEL_KEY = 'kuku-dx-level';
+    const XP_KEY = 'kuku-dx-experience';
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const bar = document.querySelector('#bar');
     const selectedMode = document.querySelector('#selected-mode');
@@ -107,6 +116,8 @@
     let left, right, entry = '', total = 0, correct = 0, point = 0, combo = 0, life = 3, locked = false, gameOver = false, selectedTable = 'all';
     let highScore = Number(localStorage.getItem(HIGH_SCORE_KEY)) || 0;
     let coins = Number(localStorage.getItem(COINS_KEY)) || 0;
+    let level = Number(localStorage.getItem(LEVEL_KEY)) || 1;
+    let experience = Number(localStorage.getItem(XP_KEY)) || 0;
     let recognition = null, isListening = false, restartTimer = null, speechToken = 0;
 
     function tableName() { return selectedTable === 'all' ? '全部の段' : `${selectedTable}の段`; }
@@ -117,6 +128,10 @@
       comboLabel.textContent = `${combo}コンボ`;
       highScoreLabel.textContent = highScore;
       coinsLabel.textContent = coins;
+      const neededExperience = level * 100;
+      levelLabel.textContent = `Lv.${level}`;
+      xpLabel.textContent = `${experience} / ${neededExperience} EXP`;
+      xpBar.style.width = `${Math.min(experience / neededExperience * 100, 100)}%`;
       lives.textContent = '♥ '.repeat(life).trim() || '♥ 0';
       lives.setAttribute('aria-label', `ライフ ${life}`);
       bar.style.width = `${Math.min(total, 10) * 10}%`;
@@ -200,14 +215,24 @@
       readQuestion();
     }
     function resetGame() { stopListening(); total = 0; correct = 0; point = 0; combo = 0; life = 3; gameOver = false; renderScore(); next(); }
+    function addExperience(amount) {
+      experience += amount;
+      let leveledUp = false;
+      while (experience >= level * 100) { experience -= level * 100; level++; leveledUp = true; }
+      localStorage.setItem(LEVEL_KEY, level);
+      localStorage.setItem(XP_KEY, experience);
+      return leveledUp;
+    }
     function check() {
       if (locked || gameOver || !entry) return;
       locked = true; total++;
       stopListening();
       if (Number(entry) === left * right) {
         correct++; point += 10; combo++; coins++; localStorage.setItem(COINS_KEY, coins);
+        const leveledUp = addExperience(10);
         if (point > highScore) { highScore = point; localStorage.setItem(HIGH_SCORE_KEY, highScore); }
-        feedback.textContent = combo > 1 ? `せいかい！ +10点・+1コイン　${combo}コンボ！` : 'せいかい！ +10点・+1コイン';
+        const reward = `+10点・+1コイン・+10EXP${leveledUp ? '　レベルアップ！' : ''}`;
+        feedback.textContent = combo > 1 ? `せいかい！ ${reward}　${combo}コンボ！` : `せいかい！ ${reward}`;
         feedback.className = 'feedback ok';
       }
       else {
