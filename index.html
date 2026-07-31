@@ -101,7 +101,7 @@
     const stageLabel = document.querySelector('#stage-label');
     let left, right, entry = '', total = 0, correct = 0, point = 0, combo = 0, life = 3, locked = false, gameOver = false, selectedTable = 'all';
     let highScore = Number(localStorage.getItem(HIGH_SCORE_KEY)) || 0;
-    let recognition = null, isListening = false, restartTimer = null;
+    let recognition = null, isListening = false, restartTimer = null, speechToken = 0;
 
     function tableName() { return selectedTable === 'all' ? '全部の段' : `${selectedTable}の段`; }
     function renderEntry() { answer.textContent = entry || '−'; answer.classList.toggle('has-value', Boolean(entry)); }
@@ -164,7 +164,24 @@
       if (!recognition) return;
       try { recognition.start(); isListening = true; setVoiceStatus('🎤 こたえを話してね', true); } catch { /* recognition is already starting */ }
     }
-    function stopListening() { clearTimeout(restartTimer); if (recognition && isListening) recognition.stop(); isListening = false; }
+    function readQuestion() {
+      if (!('speechSynthesis' in window)) { startListening(); return; }
+      const token = ++speechToken;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(`${left} かける ${right} は？`);
+      utterance.lang = 'ja-JP'; utterance.rate = 0.88; utterance.pitch = 1.25;
+      utterance.onend = () => { if (token === speechToken) startListening(); };
+      utterance.onerror = () => { if (token === speechToken) startListening(); };
+      setVoiceStatus('ぺんたが問題を読んでいるよ…');
+      window.speechSynthesis.speak(utterance);
+    }
+    function stopListening() {
+      clearTimeout(restartTimer);
+      if (recognition && isListening) recognition.stop();
+      speechToken++;
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      isListening = false;
+    }
     function next() {
       left = selectedTable === 'all' ? Math.floor(Math.random() * 9) + 1 : Number(selectedTable);
       right = Math.floor(Math.random() * 9) + 1;
@@ -173,7 +190,7 @@
       stageLabel.textContent = tableName();
       feedback.textContent = ''; feedback.className = 'feedback';
       renderEntry();
-      startListening();
+      readQuestion();
     }
     function resetGame() { stopListening(); total = 0; correct = 0; point = 0; combo = 0; life = 3; gameOver = false; renderScore(); next(); }
     function check() {
