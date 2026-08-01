@@ -327,7 +327,7 @@
       recognition.onresult = event => {
         isListening = false;
         const value = spokenNumberToValue(event.results[0][0].transcript);
-        if (value === null || value > 81) { setVoiceStatus('数字を聞き取れなかったよ。もういちど話してね。'); scheduleListening(); return; }
+        if (value === null || value > 81) { cheerPenta('\u805e\u304d\u53d6\u308a\u3067\u304d\u307e\u305b\u3093\u3067\u3057\u305f\u3002\u3082\u3046\u4e00\u5ea6\u8a00\u3044\u76f4\u3057\u3066\u4e0b\u3055\u3044', 'sad'); setVoiceStatus('数字を聞き取れなかったよ。もういちど話してね。'); scheduleListening(); return; }
         entry = String(value); renderEntry(); setVoiceStatus(`「${value}」と聞こえたよ！`); check();
       };
       recognition.onerror = event => {
