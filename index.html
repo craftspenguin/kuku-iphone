@@ -73,6 +73,8 @@
     .problem::before { content: '✦'; top: -10px; left: -13px; }
     .problem::after { content: '✧'; right: -13px; bottom: -9px; color: #f58cab; animation-delay: .7s; }
     @keyframes sparkle { 50% { transform: scale(1.35) rotate(15deg); opacity: .55; } }
+    .problem.correct-flash { animation: correct-flash .42s ease-out; }
+    @keyframes correct-flash { 35% { border-color: #ffd45e; box-shadow: 0 0 0 7px rgb(255 212 94 / 28%), 0 0 28px rgb(255 212 94 / 72%); } }
     .stage-label { margin-bottom: 8px; color: #707b9d; font-size: 14px; font-weight: 700; }
     .equation { font-size: clamp(52px, 19vw, 78px); font-weight: 800; letter-spacing: .03em; }
     .answer { min-height: 48px; margin-top: 12px; color: #a0a8bf; font-size: 34px; font-variant-numeric: tabular-nums; }
@@ -193,6 +195,7 @@
     const gachaMessage = document.querySelector('#gacha-message');
     const wardrobe = document.querySelector('#wardrobe');
     const confettiLayer = document.querySelector('#confetti-layer');
+    const problem = document.querySelector('.problem');
     let audioContext = null;
     const HIGH_SCORE_KEY = 'kuku-dx-high-score';
     const COINS_KEY = 'kuku-dx-coins';
@@ -282,6 +285,11 @@
       });
       confettiLayer.replaceChildren(...pieces);
       setTimeout(() => confettiLayer.replaceChildren(), 1100);
+    }
+    function flashProblem() {
+      problem.classList.remove('correct-flash');
+      void problem.offsetWidth;
+      problem.classList.add('correct-flash');
     }
     function playTone(frequency, duration, type = 'sine', volume = 0.08, delay = 0) {
       try {
@@ -430,6 +438,7 @@
         feedback.textContent = combo > 1 ? `せいかい！ ${reward}　${combo}コンボ！` : `せいかい！ ${reward}`;
         cheerPenta(leveledUp ? 'レベルアップ！ すごいよ！' : 'やったー！ せいかい！', 'happy');
         celebrateCorrect();
+        flashProblem();
         playCorrectSound();
         feedback.className = 'feedback ok';
       }
