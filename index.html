@@ -176,7 +176,7 @@
     if (!ownedOutfits.includes(wornOutfit)) wornOutfit = 'default';
     let weakQuestions;
     try { weakQuestions = JSON.parse(localStorage.getItem(WEAK_QUESTIONS_KEY)) || {}; } catch { weakQuestions = {}; }
-    let recognition = null, isListening = false, restartTimer = null, speechToken = 0;
+    let recognition = null, isListening = false, restartTimer = null;
 
     function tableName() {
       if (selectedTable === 'all') return '全部の段';
@@ -299,22 +299,9 @@
       if (!recognition) return;
       try { recognition.start(); isListening = true; setVoiceStatus('🎤 こたえを話してね', true); } catch { /* recognition is already starting */ }
     }
-    function readQuestion() {
-      if (!('speechSynthesis' in window)) { startListening(); return; }
-      const token = ++speechToken;
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(`${left} かける ${right} は？`);
-      utterance.lang = 'ja-JP'; utterance.rate = 0.88; utterance.pitch = 1.25;
-      utterance.onend = () => { if (token === speechToken) startListening(); };
-      utterance.onerror = () => { if (token === speechToken) startListening(); };
-      setVoiceStatus('ぺんたが問題を読んでいるよ…');
-      window.speechSynthesis.speak(utterance);
-    }
     function stopListening() {
       clearTimeout(restartTimer);
       if (recognition && isListening) recognition.stop();
-      speechToken++;
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
       isListening = false;
     }
     function next() {
@@ -331,7 +318,7 @@
       stageLabel.textContent = selectedTable === 'weak' && !weakEntries.length ? '苦手だけ（まだないので全部の段）' : tableName();
       feedback.textContent = ''; feedback.className = 'feedback';
       renderEntry();
-      readQuestion();
+      startListening();
     }
     function resetGame() { stopListening(); total = 0; correct = 0; point = 0; combo = 0; life = 3; gameOver = false; cheerPenta('もういちど、いっしょにがんばろう！'); renderScore(); next(); }
     function addExperience(amount) {
