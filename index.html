@@ -212,7 +212,7 @@
     const bar = document.querySelector('#bar');
     const selectedMode = document.querySelector('#selected-mode');
     const stageLabel = document.querySelector('#stage-label');
-    let left, right, entry = '', total = 0, correct = 0, point = 0, combo = 0, life = 3, locked = false, gameOver = false, selectedTable = 'all';
+    let left, right, entry = '', total = 0, correct = 0, point = 0, combo = 0, life = 5, locked = false, gameOver = false, selectedTable = 'all';
     let highScore = Number(localStorage.getItem(HIGH_SCORE_KEY)) || 0;
     let coins = Number(localStorage.getItem(COINS_KEY)) || 0;
     let level = Number(localStorage.getItem(LEVEL_KEY)) || 1;
@@ -426,7 +426,7 @@
       renderEntry();
       startListening();
     }
-    function resetGame() { stopListening(); total = 0; correct = 0; point = 0; combo = 0; life = 3; gameOver = false; cheerPenta('もういちど、いっしょにがんばろう！'); renderScore(); next(); }
+    function resetGame() { stopListening(); total = 0; correct = 0; point = 0; combo = 0; life = 5; gameOver = false; cheerPenta('もういちど、いっしょにがんばろう！'); renderScore(); next(); }
     function addExperience(amount) {
       experience += amount;
       let leveledUp = false;
