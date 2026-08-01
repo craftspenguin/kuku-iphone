@@ -57,6 +57,8 @@
     .voice-status.listening { color: var(--main); }
     .coin-bank { display: flex; justify-content: center; align-items: center; gap: 6px; color: #a46e08; font-size: 18px; font-weight: 800; }
     .coin-bank span { color: #c78500; font-variant-numeric: tabular-nums; }
+    .coin-bank.coin-gain { animation: coin-gain .55s ease-out; }
+    @keyframes coin-gain { 35% { color: #f2a62c; transform: scale(1.2); text-shadow: 0 0 12px #ffd45e; } }
     .gacha { padding: 14px; border: 1px solid #eadbb2; border-radius: 18px; background: #fffdf6; text-align: center; }
     .gacha h2 { margin: 0 0 6px; color: #9b6d21; font-size: 17px; }.gacha p { margin: 0 0 10px; color: #786b51; font-size: 13px; }
     .gacha-button { min-height: 48px; padding: 0 18px; border-color: #e5b240; border-radius: 14px; background: linear-gradient(#ffd968, #f5b944); color: #704600; font-size: 16px; }
@@ -198,6 +200,7 @@
     const highScoreLabel = document.querySelector('#high-score');
     const voiceStatus = document.querySelector('#voice-status');
     const coinsLabel = document.querySelector('#coins');
+    const coinBank = document.querySelector('.coin-bank');
     const levelLabel = document.querySelector('#level');
     const xpLabel = document.querySelector('#xp');
     const xpBar = document.querySelector('#xp-bar');
@@ -311,6 +314,11 @@
       problem.classList.remove('wrong-shake');
       void problem.offsetWidth;
       problem.classList.add('wrong-shake');
+    }
+    function flashCoins() {
+      coinBank.classList.remove('coin-gain');
+      void coinBank.offsetWidth;
+      coinBank.classList.add('coin-gain');
     }
     function playTone(frequency, duration, type = 'sine', volume = 0.08, delay = 0) {
       try {
@@ -456,6 +464,7 @@
       stopListening();
       if (Number(entry) === left * right) {
         correct++; point += 10; combo++; coins += 5; improveWeakQuestion(); localStorage.setItem(COINS_KEY, coins);
+        flashCoins();
         const comboLifeBonus = combo % 10 === 0;
         if (comboLifeBonus) life++;
         const leveledUp = addExperience(10);
