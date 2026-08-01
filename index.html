@@ -455,12 +455,12 @@
       locked = true; total++;
       stopListening();
       if (Number(entry) === left * right) {
-        correct++; point += 10; combo++; coins++; improveWeakQuestion(); localStorage.setItem(COINS_KEY, coins);
+        correct++; point += 10; combo++; coins += 5; improveWeakQuestion(); localStorage.setItem(COINS_KEY, coins);
         const comboLifeBonus = combo % 10 === 0;
         if (comboLifeBonus) life++;
         const leveledUp = addExperience(10);
         if (point > highScore) { highScore = point; localStorage.setItem(HIGH_SCORE_KEY, highScore); }
-        const reward = `+10点・+1コイン・+10EXP${leveledUp ? '　レベルアップ！' : ''}`;
+        const reward = `+10点・+5コイン・+10EXP${leveledUp ? '　レベルアップ！' : ''}`;
         feedback.textContent = combo > 1 ? `せいかい！ ${reward}　${combo}コンボ！` : `せいかい！ ${reward}`;
         cheerPenta(leveledUp ? 'レベルアップ！ すごいよ！' : 'やったー！ せいかい！', 'happy');
         celebrateCorrect();
