@@ -32,6 +32,14 @@
     .penta[data-outfit="flower"] .penta-scarf { background: #83d987; }
     .penta[data-outfit="rainbow"] .penta-ribbon { background: #9c87f6; }
     .penta[data-outfit="rainbow"] .penta-scarf { background: linear-gradient(90deg, #f27e8d, #ffc64d, #7edb92, #70b8f2, #b18bf5); }
+    .penta[data-outfit="ocean"] .penta-ribbon { background: #55b8ef; }
+    .penta[data-outfit="ocean"] .penta-scarf { background: #2774d8; }
+    .penta[data-outfit="lemon"] .penta-ribbon { background: #ffe45e; }
+    .penta[data-outfit="lemon"] .penta-scarf { background: #f3a92f; }
+    .penta[data-outfit="berry"] .penta-ribbon { background: #c95bd8; }
+    .penta[data-outfit="berry"] .penta-scarf { background: #7e3bb8; }
+    .penta[data-outfit="mint"] .penta-ribbon { background: #77e1b0; }
+    .penta[data-outfit="mint"] .penta-scarf { background: #32a998; }
     .penta-message { color: #596684; font-size: 14px; font-weight: 700; line-height: 1.45; }
     .penta.happy { animation: penta-jump .45s ease 2; }.penta.sad { animation: penta-shake .5s ease; }
     @keyframes penta-jump { 50% { transform: translateY(-10px) rotate(-5deg); } }
@@ -221,7 +229,11 @@
       { id: 'default', name: 'いつもの服', rarity: 'ノーマル' },
       { id: 'star', name: 'ほしのリボン', rarity: 'レア' },
       { id: 'flower', name: 'おはなリボン', rarity: 'レア' },
-      { id: 'rainbow', name: 'にじのマフラー', rarity: 'スーパーレア' }
+      { id: 'rainbow', name: 'にじのマフラー', rarity: 'スーパーレア' },
+      { id: 'ocean', name: 'うみのリボン', rarity: 'レア' },
+      { id: 'lemon', name: 'レモンマフラー', rarity: 'レア' },
+      { id: 'berry', name: 'ベリーリボン', rarity: 'スーパーレア' },
+      { id: 'mint', name: 'ミントマフラー', rarity: 'レア' }
     ];
     let ownedOutfits;
     try { ownedOutfits = JSON.parse(localStorage.getItem(OUTFITS_KEY)) || ['default']; } catch { ownedOutfits = ['default']; }
