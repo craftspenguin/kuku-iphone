@@ -11,8 +11,11 @@
   <style>
     :root { color-scheme: light; --ink: #28304a; --paper: #f4f6ff; --card: #fff; --line: #d8ddf3; --key: #f0f2ff; --main: #6366f1; --good: #159b56; --bad: #e45c61; }
     * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100dvh; background: linear-gradient(#e9efff, var(--paper) 45%); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif; }
-    main { width: min(100%, 460px); min-height: 100dvh; margin: 0 auto; padding: max(20px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom)); display: grid; align-content: center; gap: 16px; }
+    body { position: relative; isolation: isolate; margin: 0; min-height: 100dvh; overflow-x: hidden; background: radial-gradient(circle at 12% 8%, #fff7c7 0 7%, transparent 22%), radial-gradient(circle at 92% 18%, #ffd9eb 0 8%, transparent 24%), linear-gradient(150deg, #dff8ff 0%, #eef2ff 48%, #fff3f8 100%); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif; }
+    body::before, body::after { content: ''; position: fixed; z-index: -1; border-radius: 50%; pointer-events: none; filter: blur(2px); opacity: .62; }
+    body::before { width: 180px; height: 180px; top: 30%; left: -70px; background: #bdeff2; }
+    body::after { width: 220px; height: 220px; right: -90px; bottom: 7%; background: #f8c9df; }
+    main { position: relative; z-index: 1; width: min(100%, 460px); min-height: 100dvh; margin: 0 auto; padding: max(20px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom)); display: grid; align-content: center; gap: 16px; }
     .topline { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
     .title { font-size: 20px; }
     .penta-card { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1px solid #d8ddf3; border-radius: 18px; background: #fff; }
