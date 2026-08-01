@@ -33,6 +33,9 @@
     .penta.happy { animation: penta-jump .45s ease 2; }.penta.sad { animation: penta-shake .5s ease; }
     @keyframes penta-jump { 50% { transform: translateY(-10px) rotate(-5deg); } }
     @keyframes penta-shake { 25% { transform: translateX(-5px) rotate(-4deg); } 75% { transform: translateX(5px) rotate(4deg); } }
+    .confetti-layer { position: fixed; inset: 0; z-index: 20; overflow: hidden; pointer-events: none; }
+    .confetti { position: absolute; top: -14px; width: 10px; height: 16px; border-radius: 3px; opacity: 0; animation: confetti-fall 900ms ease-out forwards; }
+    @keyframes confetti-fall { 0% { opacity: 1; transform: translate3d(0, -10px, 0) rotate(0deg); } 100% { opacity: 0; transform: translate3d(var(--drift), 105vh, 0) rotate(540deg); } }
     .score { color: #65708e; font-size: 14px; font-variant-numeric: tabular-nums; }
     .points { color: var(--main); font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; }
     .lives { color: #e45c61; font-size: 18px; font-weight: 800; letter-spacing: .08em; }
@@ -78,6 +81,7 @@
   </style>
 </head>
 <body>
+  <div class="confetti-layer" id="confetti-layer" aria-hidden="true"></div>
   <main aria-label="九九ゲームDX">
     <div class="topline"><strong class="title">九九ゲームDX</strong><span class="lives" id="lives" aria-label="ライフ 3">♥ ♥ ♥</span><span class="points" id="points">0点</span></div>
     <div class="penta-card" aria-live="polite">
@@ -147,6 +151,7 @@
     const gachaButton = document.querySelector('#gacha-button');
     const gachaMessage = document.querySelector('#gacha-message');
     const wardrobe = document.querySelector('#wardrobe');
+    const confettiLayer = document.querySelector('#confetti-layer');
     const HIGH_SCORE_KEY = 'kuku-dx-high-score';
     const COINS_KEY = 'kuku-dx-coins';
     const LEVEL_KEY = 'kuku-dx-level';
@@ -221,6 +226,20 @@
         void penta.offsetWidth;
         penta.classList.add(animation);
       }
+    }
+    function celebrateCorrect() {
+      const colors = ['#f58cab', '#ffd55c', '#68d6e5', '#9f7aea', '#83d987'];
+      const pieces = Array.from({ length: 28 }, (_, index) => {
+        const piece = document.createElement('span');
+        piece.className = 'confetti';
+        piece.style.left = `${8 + Math.random() * 84}%`;
+        piece.style.background = colors[index % colors.length];
+        piece.style.setProperty('--drift', `${-90 + Math.random() * 180}px`);
+        piece.style.animationDelay = `${Math.random() * 120}ms`;
+        return piece;
+      });
+      confettiLayer.replaceChildren(...pieces);
+      setTimeout(() => confettiLayer.replaceChildren(), 1100);
     }
     function renderWardrobe() {
       penta.dataset.outfit = wornOutfit;
@@ -340,6 +359,7 @@
         const reward = `+10点・+1コイン・+10EXP${leveledUp ? '　レベルアップ！' : ''}`;
         feedback.textContent = combo > 1 ? `せいかい！ ${reward}　${combo}コンボ！` : `せいかい！ ${reward}`;
         cheerPenta(leveledUp ? 'レベルアップ！ すごいよ！' : 'やったー！ せいかい！', 'happy');
+        celebrateCorrect();
         feedback.className = 'feedback ok';
       }
       else {
