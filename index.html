@@ -60,6 +60,8 @@
     .coin-bank { display: flex; justify-content: center; align-items: center; gap: 6px; color: #a46e08; font-size: 18px; font-weight: 800; }
     .coin-bank span { color: #c78500; font-variant-numeric: tabular-nums; }
     .streak { margin-top: -5px; color: #e2763b; text-align: center; font-size: 13px; line-height: 13px; font-weight: 800; }
+    .streak.streak-milestone { animation: streak-milestone .8s ease-out; }
+    @keyframes streak-milestone { 35% { color: #f08a12; transform: scale(1.35); text-shadow: 0 0 14px #ffd45e; } }
     .coin-bank.coin-gain { animation: coin-gain .55s ease-out; }
     @keyframes coin-gain { 35% { color: #f2a62c; transform: scale(1.2); text-shadow: 0 0 12px #ffd45e; } }
     .gacha { padding: 14px; border: 1px solid #eadbb2; border-radius: 18px; background: #fffdf6; text-align: center; }
@@ -334,6 +336,11 @@
       void comboLabel.offsetWidth;
       comboLabel.classList.add('combo-special');
     }
+    function flashStreak() {
+      streakLabel.classList.remove('streak-milestone');
+      void streakLabel.offsetWidth;
+      streakLabel.classList.add('streak-milestone');
+    }
     function updateStreak() {
       const now = new Date();
       const today = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
@@ -353,6 +360,8 @@
         localStorage.setItem(COINS_KEY, coins);
         cheerPenta(`${streak}日連続！ボーナスコイン${bonus}枚だよ！`, 'happy');
         flashCoins();
+        flashStreak();
+        celebrateCorrect();
       }
     }
     function claimDailyBonus() {
