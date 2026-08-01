@@ -221,6 +221,7 @@
     const OUTFITS_KEY = 'kuku-dx-outfits';
     const WORN_OUTFIT_KEY = 'kuku-dx-worn-outfit';
     const WEAK_QUESTIONS_KEY = 'kuku-dx-weak-questions';
+    const DAILY_BONUS_KEY = 'kuku-dx-daily-bonus';
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const bar = document.querySelector('#bar');
     const selectedMode = document.querySelector('#selected-mode');
@@ -326,6 +327,16 @@
       comboLabel.classList.remove('combo-special');
       void comboLabel.offsetWidth;
       comboLabel.classList.add('combo-special');
+    }
+    function claimDailyBonus() {
+      const now = new Date();
+      const today = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+      if (localStorage.getItem(DAILY_BONUS_KEY) === today) return;
+      coins += 10;
+      localStorage.setItem(COINS_KEY, coins);
+      localStorage.setItem(DAILY_BONUS_KEY, today);
+      cheerPenta('おかえり！デイリーボーナス、コイン10枚だよ！', 'happy');
+      flashCoins();
     }
     function playTone(frequency, duration, type = 'sine', volume = 0.08, delay = 0) {
       try {
@@ -517,6 +528,7 @@
     document.querySelector('#reset').addEventListener('click', resetGame);
     gachaButton.addEventListener('click', drawGacha);
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+    claimDailyBonus();
     renderScore(); next();
   </script>
 </body>
