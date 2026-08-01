@@ -80,6 +80,38 @@
     .submit { display: none; }
     .submit { background: var(--main); color: #fff; border-color: var(--main); }
     .reset { font-size: 16px; }
+    @media (max-height: 820px) {
+      main { padding-top: max(8px, env(safe-area-inset-top)); padding-bottom: max(8px, env(safe-area-inset-bottom)); gap: 6px; align-content: start; }
+      .penta-card { padding: 5px 9px; gap: 8px; }
+      .penta { width: 48px; height: 48px; flex-basis: 48px; }
+      .penta::before { inset: 11px 8px 6px; }
+      .penta-eye { top: 17px; width: 5px; height: 7px; }
+      .penta-eye.left { left: 17px; }.penta-eye.right { right: 17px; }
+      .penta-beak { top: 24px; left: 20px; width: 9px; height: 6px; }
+      .penta-ribbon { top: -3px; right: 6px; width: 16px; height: 9px; }
+      .penta-scarf { right: 4px; bottom: 5px; left: 4px; height: 6px; }
+      .penta-message { font-size: 12px; }
+      .mode { padding: 7px; }
+      .mode-title { margin-bottom: 5px; font-size: 13px; }
+      .mode-buttons { gap: 4px; }
+      .mode-button { min-height: 29px; font-size: 12px; border-radius: 8px; }
+      .progress { height: 5px; }
+      .problem { padding: 10px 8px 8px; border-radius: 15px; }
+      .stage-label { margin-bottom: 2px; font-size: 12px; }
+      .equation { font-size: clamp(42px, 13vw, 58px); }
+      .answer { min-height: 30px; margin-top: 2px; font-size: 24px; }
+      .feedback { min-height: 18px; margin-top: 2px; font-size: 13px; }
+      .voice-status { min-height: 16px; font-size: 11px; }
+      .actions { gap: 5px; }
+      .reset { min-height: 36px; font-size: 13px; }
+      .gacha { padding: 7px; }
+      .gacha h2 { margin-bottom: 2px; font-size: 14px; }
+      .gacha p { margin-bottom: 4px; font-size: 11px; }
+      .gacha-button { min-height: 32px; font-size: 13px; }
+      .gacha-message { min-height: 14px; margin: 3px 0 1px; font-size: 11px; }
+      .wardrobe { gap: 4px; margin-top: 3px; }
+      .wardrobe button { min-height: 25px; font-size: 10px; }
+    }
   </style>
 </head>
 <body>
