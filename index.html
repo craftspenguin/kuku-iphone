@@ -323,7 +323,7 @@
     function setupRecognition() {
       if (!SpeechRecognition) { setVoiceStatus('このブラウザでは音声認識を使えません。テンキーで答えよう。'); return; }
       recognition = new SpeechRecognition();
-      recognition.lang = 'ja-JP'; recognition.interimResults = false; recognition.continuous = false; recognition.maxAlternatives = 1;
+      recognition.lang = 'ja-JP'; recognition.interimResults = true; recognition.continuous = false; recognition.maxAlternatives = 1;
       recognition.onresult = event => {
         isListening = false;
         const value = spokenNumberToValue(event.results[0][0].transcript);
