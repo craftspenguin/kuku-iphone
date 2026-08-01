@@ -341,10 +341,18 @@
       const yesterday = `${yesterdayDate.getFullYear()}-${yesterdayDate.getMonth() + 1}-${yesterdayDate.getDate()}`;
       const lastDate = localStorage.getItem(STREAK_DATE_KEY);
       let streak = Number(localStorage.getItem(STREAK_KEY)) || 0;
-      if (lastDate !== today) streak = lastDate === yesterday ? streak + 1 : 1;
+      const advanced = lastDate !== today;
+      if (advanced) streak = lastDate === yesterday ? streak + 1 : 1;
       localStorage.setItem(STREAK_KEY, streak);
       localStorage.setItem(STREAK_DATE_KEY, today);
       streakLabel.textContent = `🔥 ${streak}日`;
+      if (advanced && [3, 7, 30].includes(streak)) {
+        const bonus = streak === 30 ? 100 : streak === 7 ? 30 : 10;
+        coins += bonus;
+        localStorage.setItem(COINS_KEY, coins);
+        cheerPenta(`${streak}日連続！ボーナスコイン${bonus}枚だよ！`, 'happy');
+        flashCoins();
+      }
     }
     function claimDailyBonus() {
       const now = new Date();
