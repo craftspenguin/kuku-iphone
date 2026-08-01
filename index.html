@@ -230,7 +230,7 @@
     if (!ownedOutfits.includes(wornOutfit)) wornOutfit = 'default';
     let weakQuestions;
     try { weakQuestions = JSON.parse(localStorage.getItem(WEAK_QUESTIONS_KEY)) || {}; } catch { weakQuestions = {}; }
-    let recognition = null, isListening = false, restartTimer = null;
+    let recognition = null, isListening = false, restartTimer = null, previousQuestion = '';
 
     function tableName() {
       if (selectedTable === 'all') return '全部の段';
@@ -419,6 +419,9 @@
         left = selectedTable === 'all' || selectedTable === 'weak' ? Math.floor(Math.random() * 9) + 1 : Number(selectedTable);
         right = Math.floor(Math.random() * 9) + 1;
       }
+      const currentQuestion = `${left}x${right}`;
+      if (currentQuestion === previousQuestion && selectedTable !== 'weak') right = right % 9 + 1;
+      previousQuestion = `${left}x${right}`;
       entry = ''; locked = false;
       question.textContent = `${left} × ${right}`;
       stageLabel.textContent = selectedTable === 'weak' && !weakEntries.length ? '苦手だけ（まだないので全部の段）' : tableName();
