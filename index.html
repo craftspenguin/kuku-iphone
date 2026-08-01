@@ -50,6 +50,10 @@
     .confetti-layer { position: fixed; inset: 0; z-index: 20; overflow: hidden; pointer-events: none; }
     .confetti { position: absolute; top: -14px; width: 10px; height: 16px; border-radius: 3px; opacity: 0; animation: confetti-fall 900ms ease-out forwards; }
     @keyframes confetti-fall { 0% { opacity: 1; transform: translate3d(0, -10px, 0) rotate(0deg); } 100% { opacity: 0; transform: translate3d(var(--drift), 105vh, 0) rotate(540deg); } }
+    .season-decor { position: fixed; z-index: 0; top: 8%; right: 6%; color: #f58cab; font-size: 26px; opacity: .65; pointer-events: none; animation: season-float 3s ease-in-out infinite; }
+    @keyframes season-float { 50% { transform: translateY(12px) rotate(8deg); opacity: .35; } }
+    .season-particle { position: fixed; z-index: 0; top: -24px; pointer-events: none; opacity: .55; animation: season-fall 7s linear infinite; }
+    @keyframes season-fall { to { transform: translate3d(var(--drift), 110vh, 0) rotate(260deg); } }
     .score { color: #65708e; font-size: 14px; font-variant-numeric: tabular-nums; }
     .points { color: var(--main); font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; }
     .lives { color: #e45c61; flex-shrink: 0; white-space: nowrap; font-family: "Arial Black", "Courier New", monospace; font-size: 32px; font-weight: 900; letter-spacing: -.06em; text-shadow: 1px 0 #c94350, -1px 0 #c94350, 0 1px #c94350; transform: scale(1.35, .95); transform-origin: left center; }
@@ -148,6 +152,8 @@
 </head>
 <body>
   <div class="confetti-layer" id="confetti-layer" aria-hidden="true"></div>
+  <div class="season-decor" id="season-decor" aria-hidden="true"></div>
+  <div id="season-particles" aria-hidden="true"></div>
   <main aria-label="九九ゲームDX">
     <div class="topline"><strong class="title">九九ゲームDX</strong><span class="lives" id="lives" aria-label="ライフ 3">♥ ♥ ♥</span><span class="points" id="points">0点</span></div>
     <div class="penta-card" aria-live="polite">
@@ -221,6 +227,8 @@
     const gachaMessage = document.querySelector('#gacha-message');
     const wardrobe = document.querySelector('#wardrobe');
     const confettiLayer = document.querySelector('#confetti-layer');
+    const seasonDecor = document.querySelector('#season-decor');
+    const seasonParticles = document.querySelector('#season-particles');
     const problem = document.querySelector('.problem');
     let audioContext = null;
     const HIGH_SCORE_KEY = 'kuku-dx-high-score';
@@ -371,6 +379,24 @@
       const month = new Date().getMonth() + 1;
       const season = month >= 3 && month <= 5 ? 'spring' : month >= 6 && month <= 8 ? 'summer' : month >= 9 && month <= 11 ? 'autumn' : 'winter';
       document.body.dataset.season = season;
+      const messages = {
+        spring: 'ぽかぽか春だね！いっしょに九九をがんばろう！',
+        summer: '夏だー！あせらず元気に九九チャレンジ！',
+        autumn: '秋の九九まつり！今日もぺんたと遊ぼう！',
+        winter: '冬もぬくぬく九九れんしゅう！'
+      };
+      seasonDecor.textContent = { spring: '🌸', summer: '💧', autumn: '🍂', winter: '❄️' }[season];
+      const particle = { spring: '🌸', summer: '💧', autumn: '🍂', winter: '❄️' }[season];
+      seasonParticles.replaceChildren(...Array.from({ length: 7 }, (_, index) => {
+        const item = document.createElement('span');
+        item.className = 'season-particle';
+        item.textContent = particle;
+        item.style.left = `${8 + index * 13}%`;
+        item.style.animationDelay = `${index * -1.1}s`;
+        item.style.setProperty('--drift', `${-35 + (index % 3) * 35}px`);
+        return item;
+      }));
+      cheerPenta(messages[season], 'happy');
     }
     function claimDailyBonus() {
       const now = new Date();
