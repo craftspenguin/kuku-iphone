@@ -335,6 +335,9 @@
         if (event.error === 'not-allowed' || event.error === 'service-not-allowed') setVoiceStatus('マイクを許可すると、声で答えられるよ。');
         else if (!locked && !gameOver) { setVoiceStatus('もういちど答えを話してね。'); scheduleListening(); }
       };
+      recognition.onspeechend = () => {
+        if (isListening) recognition.stop();
+      };
       recognition.onend = () => { isListening = false; if (!locked && !gameOver && voiceStatus.classList.contains('listening')) scheduleListening(); };
     }
     function startListening() {
