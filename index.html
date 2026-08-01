@@ -73,9 +73,11 @@
     .feedback { min-height: 24px; margin-top: 8px; font-weight: 700; }
     .ok { color: var(--good); } .ng { color: var(--bad); }
     .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .keypad { display: none; }
     button { min-height: 64px; border: 1px solid var(--line); border-radius: 16px; background: var(--key); color: var(--ink); font: inherit; font-size: 24px; font-weight: 700; touch-action: manipulation; -webkit-tap-highlight-color: transparent; cursor: pointer; }
     button:active { transform: scale(.97); }
-    .actions { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
+    .actions { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    .submit { display: none; }
     .submit { background: var(--main); color: #fff; border-color: var(--main); }
     .reset { font-size: 16px; }
   </style>
