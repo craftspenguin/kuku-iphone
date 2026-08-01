@@ -77,6 +77,8 @@
     @keyframes correct-flash { 35% { border-color: #ffd45e; box-shadow: 0 0 0 7px rgb(255 212 94 / 28%), 0 0 28px rgb(255 212 94 / 72%); } }
     .problem.wrong-shake { animation: wrong-shake .38s ease-out; }
     @keyframes wrong-shake { 20% { transform: translateX(-7px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(5px); } }
+    .lives.life-lost { animation: life-lost .5s ease-out; }
+    @keyframes life-lost { 25% { transform: scale(1.35) rotate(-8deg); color: #ff9caa; } 55% { transform: scale(.85) rotate(8deg); } }
     .stage-label { margin-bottom: 8px; color: #707b9d; font-size: 14px; font-weight: 700; }
     .equation { font-size: clamp(52px, 19vw, 78px); font-weight: 800; letter-spacing: .03em; }
     .answer { min-height: 48px; margin-top: 12px; color: #a0a8bf; font-size: 34px; font-variant-numeric: tabular-nums; }
@@ -452,6 +454,9 @@
       else {
         life--; combo = 0; rememberWeakQuestion();
         shakeProblem();
+        lives.classList.remove('life-lost');
+        void lives.offsetWidth;
+        lives.classList.add('life-lost');
         if (life === 0) { gameOver = true; feedback.textContent = `ゲームオーバー！ こたえは ${left * right}。はじめからで再挑戦！`; cheerPenta('またいっしょに挑戦しよう！', 'sad'); }
         else { feedback.textContent = `おしい！ こたえは ${left * right}（ライフ -1）`; cheerPenta('おしい〜！ もういっかい！', 'sad'); }
         feedback.className = 'feedback ng';
