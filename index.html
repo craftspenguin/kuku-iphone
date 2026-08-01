@@ -68,7 +68,11 @@
     .mode-button.is-selected { background: var(--main); border-color: var(--main); color: #fff; }
     .progress { height: 8px; border-radius: 99px; overflow: hidden; background: #dfe3f6; }
     .progress span { display: block; height: 100%; width: 0%; background: var(--main); transition: width .2s ease; }
-    .problem { width: min(62%, 300px); justify-self: center; text-align: center; padding: 6px 4px 4px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); box-shadow: 0 8px 20px rgb(77 88 156 / 8%); }
+    .problem { position: relative; width: min(62%, 300px); justify-self: center; text-align: center; padding: 6px 4px 4px; border: 2px solid #cfd6ff; border-radius: 14px; background: linear-gradient(145deg, #fff, #f8f7ff); box-shadow: 0 8px 20px rgb(77 88 156 / 12%), 0 0 0 4px rgb(255 255 255 / 55%); }
+    .problem::before, .problem::after { position: absolute; color: #ffd45e; font-size: 16px; line-height: 1; animation: sparkle 1.8s ease-in-out infinite; pointer-events: none; }
+    .problem::before { content: '✦'; top: -10px; left: -13px; }
+    .problem::after { content: '✧'; right: -13px; bottom: -9px; color: #f58cab; animation-delay: .7s; }
+    @keyframes sparkle { 50% { transform: scale(1.35) rotate(15deg); opacity: .55; } }
     .stage-label { margin-bottom: 8px; color: #707b9d; font-size: 14px; font-weight: 700; }
     .equation { font-size: clamp(52px, 19vw, 78px); font-weight: 800; letter-spacing: .03em; }
     .answer { min-height: 48px; margin-top: 12px; color: #a0a8bf; font-size: 34px; font-variant-numeric: tabular-nums; }
