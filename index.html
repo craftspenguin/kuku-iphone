@@ -41,7 +41,7 @@
     @keyframes confetti-fall { 0% { opacity: 1; transform: translate3d(0, -10px, 0) rotate(0deg); } 100% { opacity: 0; transform: translate3d(var(--drift), 105vh, 0) rotate(540deg); } }
     .score { color: #65708e; font-size: 14px; font-variant-numeric: tabular-nums; }
     .points { color: var(--main); font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; }
-    .lives { color: #e45c61; font-family: "Arial Black", "Courier New", monospace; font-size: 23px; font-weight: 900; letter-spacing: .1em; text-shadow: 1px 0 #c94350, -1px 0 #c94350, 0 1px #c94350; transform: scaleY(.92); transform-origin: left center; }
+    .lives { color: #e45c61; flex-shrink: 0; white-space: nowrap; font-family: "Arial Black", "Courier New", monospace; font-size: 32px; font-weight: 900; letter-spacing: .12em; text-shadow: 1px 0 #c94350, -1px 0 #c94350, 0 1px #c94350; transform: scaleY(.92); transform-origin: left center; }
     .game-stats { display: flex; justify-content: space-between; align-items: center; }
     .combo { color: #ef7a31; font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; }
     .highscore { color: #9b6d21; font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; }
