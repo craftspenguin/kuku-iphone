@@ -57,6 +57,8 @@
     .mode-buttons { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
     .mode-button { min-height: 40px; border-radius: 12px; font-size: 15px; }
     .mode-button.all { grid-column: span 2; }
+    .mode-button.weak { grid-column: span 2; background: #fff4df; border-color: #f0ca7a; color: #985d00; }
+    .mode-button.weak.is-selected { background: #f2a62c; border-color: #f2a62c; color: #fff; }
     .mode-button.is-selected { background: var(--main); border-color: var(--main); color: #fff; }
     .progress { height: 8px; border-radius: 99px; overflow: hidden; background: #dfe3f6; }
     .progress span { display: block; height: 100%; width: 0%; background: var(--main); transition: width .2s ease; }
@@ -98,6 +100,7 @@
         <button class="mode-button" type="button" data-table="7">7の段</button>
         <button class="mode-button" type="button" data-table="8">8の段</button>
         <button class="mode-button" type="button" data-table="9">9の段</button>
+        <button class="mode-button weak" type="button" data-table="weak">苦手だけ</button>
       </div>
     </section>
 
@@ -150,6 +153,7 @@
     const XP_KEY = 'kuku-dx-experience';
     const OUTFITS_KEY = 'kuku-dx-outfits';
     const WORN_OUTFIT_KEY = 'kuku-dx-worn-outfit';
+    const WEAK_QUESTIONS_KEY = 'kuku-dx-weak-questions';
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const bar = document.querySelector('#bar');
     const selectedMode = document.querySelector('#selected-mode');
@@ -170,9 +174,29 @@
     if (!ownedOutfits.includes('default')) ownedOutfits.unshift('default');
     let wornOutfit = localStorage.getItem(WORN_OUTFIT_KEY) || 'default';
     if (!ownedOutfits.includes(wornOutfit)) wornOutfit = 'default';
+    let weakQuestions;
+    try { weakQuestions = JSON.parse(localStorage.getItem(WEAK_QUESTIONS_KEY)) || {}; } catch { weakQuestions = {}; }
     let recognition = null, isListening = false, restartTimer = null, speechToken = 0;
 
-    function tableName() { return selectedTable === 'all' ? '全部の段' : `${selectedTable}の段`; }
+    function tableName() {
+      if (selectedTable === 'all') return '全部の段';
+      if (selectedTable === 'weak') return '苦手だけ';
+      return `${selectedTable}の段`;
+    }
+    function saveWeakQuestions() { localStorage.setItem(WEAK_QUESTIONS_KEY, JSON.stringify(weakQuestions)); }
+    function weakQuestionKey() { return `${left}x${right}`; }
+    function rememberWeakQuestion() {
+      const key = weakQuestionKey();
+      weakQuestions[key] = (weakQuestions[key] || 0) + 1;
+      saveWeakQuestions();
+    }
+    function improveWeakQuestion() {
+      const key = weakQuestionKey();
+      if (!weakQuestions[key]) return;
+      weakQuestions[key]--;
+      if (weakQuestions[key] <= 0) delete weakQuestions[key];
+      saveWeakQuestions();
+    }
     function renderEntry() { answer.textContent = entry || '−'; answer.classList.toggle('has-value', Boolean(entry)); }
     function renderScore() {
       score.textContent = `${total}問中 ${correct}問正解`;
@@ -294,11 +318,17 @@
       isListening = false;
     }
     function next() {
-      left = selectedTable === 'all' ? Math.floor(Math.random() * 9) + 1 : Number(selectedTable);
-      right = Math.floor(Math.random() * 9) + 1;
+      const weakEntries = Object.entries(weakQuestions);
+      if (selectedTable === 'weak' && weakEntries.length) {
+        const weighted = weakEntries.flatMap(([key, count]) => Array(Math.min(count, 4)).fill(key));
+        [left, right] = weighted[Math.floor(Math.random() * weighted.length)].split('x').map(Number);
+      } else {
+        left = selectedTable === 'all' || selectedTable === 'weak' ? Math.floor(Math.random() * 9) + 1 : Number(selectedTable);
+        right = Math.floor(Math.random() * 9) + 1;
+      }
       entry = ''; locked = false;
       question.textContent = `${left} × ${right}`;
-      stageLabel.textContent = tableName();
+      stageLabel.textContent = selectedTable === 'weak' && !weakEntries.length ? '苦手だけ（まだないので全部の段）' : tableName();
       feedback.textContent = ''; feedback.className = 'feedback';
       renderEntry();
       readQuestion();
@@ -317,7 +347,7 @@
       locked = true; total++;
       stopListening();
       if (Number(entry) === left * right) {
-        correct++; point += 10; combo++; coins++; localStorage.setItem(COINS_KEY, coins);
+        correct++; point += 10; combo++; coins++; improveWeakQuestion(); localStorage.setItem(COINS_KEY, coins);
         const leveledUp = addExperience(10);
         if (point > highScore) { highScore = point; localStorage.setItem(HIGH_SCORE_KEY, highScore); }
         const reward = `+10点・+1コイン・+10EXP${leveledUp ? '　レベルアップ！' : ''}`;
@@ -326,7 +356,7 @@
         feedback.className = 'feedback ok';
       }
       else {
-        life--; combo = 0;
+        life--; combo = 0; rememberWeakQuestion();
         if (life === 0) { gameOver = true; feedback.textContent = `ゲームオーバー！ こたえは ${left * right}。はじめからで再挑戦！`; cheerPenta('またいっしょに挑戦しよう！', 'sad'); }
         else { feedback.textContent = `おしい！ こたえは ${left * right}（ライフ -1）`; cheerPenta('おしい〜！ もういっかい！', 'sad'); }
         feedback.className = 'feedback ng';
