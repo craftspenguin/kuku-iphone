@@ -15,6 +15,9 @@
     body::before, body::after { content: ''; position: fixed; z-index: -1; border-radius: 50%; pointer-events: none; filter: blur(2px); opacity: .62; }
     body::before { width: 180px; height: 180px; top: 30%; left: -70px; background: #bdeff2; }
     body::after { width: 220px; height: 220px; right: -90px; bottom: 7%; background: #f8c9df; }
+    body[data-season="summer"] { background: radial-gradient(circle at 12% 8%, #fff2a8 0 7%, transparent 22%), radial-gradient(circle at 92% 18%, #b8f3e4 0 8%, transparent 24%), linear-gradient(150deg, #c9f7ff 0%, #e7fff0 48%, #fff9dc 100%); }
+    body[data-season="autumn"] { background: radial-gradient(circle at 12% 8%, #ffe1a8 0 7%, transparent 22%), radial-gradient(circle at 92% 18%, #f6c3a4 0 8%, transparent 24%), linear-gradient(150deg, #ffe8c9 0%, #fff1dc 48%, #f9d9c8 100%); }
+    body[data-season="winter"] { background: radial-gradient(circle at 12% 8%, #d9f4ff 0 7%, transparent 22%), radial-gradient(circle at 92% 18%, #d5d7ff 0 8%, transparent 24%), linear-gradient(150deg, #dceeff 0%, #f0f3ff 48%, #e8e8ff 100%); }
     main { position: relative; z-index: 1; width: min(100%, 460px); min-height: 100dvh; margin: 0 auto; padding: max(20px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom)); display: grid; align-content: center; gap: 16px; }
     .topline { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
     .title { font-size: 20px; }
@@ -364,6 +367,11 @@
         celebrateCorrect();
       }
     }
+    function applySeason() {
+      const month = new Date().getMonth() + 1;
+      const season = month >= 3 && month <= 5 ? 'spring' : month >= 6 && month <= 8 ? 'summer' : month >= 9 && month <= 11 ? 'autumn' : 'winter';
+      document.body.dataset.season = season;
+    }
     function claimDailyBonus() {
       const now = new Date();
       const today = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
@@ -564,6 +572,7 @@
     document.querySelector('#reset').addEventListener('click', resetGame);
     gachaButton.addEventListener('click', drawGacha);
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+    applySeason();
     updateStreak();
     claimDailyBonus();
     renderScore(); next();
