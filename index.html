@@ -59,6 +59,7 @@
     .voice-status.listening { color: var(--main); }
     .coin-bank { display: flex; justify-content: center; align-items: center; gap: 6px; color: #a46e08; font-size: 18px; font-weight: 800; }
     .coin-bank span { color: #c78500; font-variant-numeric: tabular-nums; }
+    .streak { color: #e2763b; text-align: center; font-size: 13px; font-weight: 800; }
     .coin-bank.coin-gain { animation: coin-gain .55s ease-out; }
     @keyframes coin-gain { 35% { color: #f2a62c; transform: scale(1.2); text-shadow: 0 0 12px #ffd45e; } }
     .gacha { padding: 14px; border: 1px solid #eadbb2; border-radius: 18px; background: #fffdf6; text-align: center; }
@@ -183,6 +184,7 @@
     </div>
     <div class="actions"><button type="button" class="submit" id="check">こたえる</button><button type="button" class="reset" id="reset">はじめから</button></div>
     <div class="coin-bank" aria-label="コイン"><span aria-hidden="true">🪙</span> コイン <span id="coins">0</span></div>
+    <div class="streak" id="streak">🔥 0日</div>
     <section class="gacha" aria-labelledby="gacha-title">
       <h2 id="gacha-title">ぺんたのきせかえガチャ</h2>
       <p>コイン10枚で新しいアイテムを1つゲット！</p>
@@ -202,6 +204,7 @@
     const highScoreLabel = document.querySelector('#high-score');
     const voiceStatus = document.querySelector('#voice-status');
     const coinsLabel = document.querySelector('#coins');
+    const streakLabel = document.querySelector('#streak');
     const coinBank = document.querySelector('.coin-bank');
     const levelLabel = document.querySelector('#level');
     const xpLabel = document.querySelector('#xp');
@@ -222,6 +225,8 @@
     const WORN_OUTFIT_KEY = 'kuku-dx-worn-outfit';
     const WEAK_QUESTIONS_KEY = 'kuku-dx-weak-questions';
     const DAILY_BONUS_KEY = 'kuku-dx-daily-bonus';
+    const STREAK_KEY = 'kuku-dx-streak';
+    const STREAK_DATE_KEY = 'kuku-dx-streak-date';
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const bar = document.querySelector('#bar');
     const selectedMode = document.querySelector('#selected-mode');
@@ -327,6 +332,19 @@
       comboLabel.classList.remove('combo-special');
       void comboLabel.offsetWidth;
       comboLabel.classList.add('combo-special');
+    }
+    function updateStreak() {
+      const now = new Date();
+      const today = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+      const yesterdayDate = new Date(now);
+      yesterdayDate.setDate(now.getDate() - 1);
+      const yesterday = `${yesterdayDate.getFullYear()}-${yesterdayDate.getMonth() + 1}-${yesterdayDate.getDate()}`;
+      const lastDate = localStorage.getItem(STREAK_DATE_KEY);
+      let streak = Number(localStorage.getItem(STREAK_KEY)) || 0;
+      if (lastDate !== today) streak = lastDate === yesterday ? streak + 1 : 1;
+      localStorage.setItem(STREAK_KEY, streak);
+      localStorage.setItem(STREAK_DATE_KEY, today);
+      streakLabel.textContent = `🔥 ${streak}日`;
     }
     function claimDailyBonus() {
       const now = new Date();
@@ -528,6 +546,7 @@
     document.querySelector('#reset').addEventListener('click', resetGame);
     gachaButton.addEventListener('click', drawGacha);
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+    updateStreak();
     claimDailyBonus();
     renderScore(); next();
   </script>
