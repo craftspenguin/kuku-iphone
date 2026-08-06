@@ -91,6 +91,8 @@
     .mode-button.is-selected { background: var(--main); border-color: var(--main); color: #fff; }
     .progress { height: 8px; border-radius: 99px; overflow: hidden; background: #dfe3f6; }
     .progress span { display: block; height: 100%; width: 0%; background: var(--main); transition: width .2s ease; }
+    .time-attack { min-height: 38px; width: 100%; margin-top: 7px; border-radius: 12px; background: #fff0d8; border-color: #f0c477; color: #9b640e; font-size: 14px; }
+    .time-status { min-height: 18px; color: #c26b22; text-align: center; font-size: 13px; font-weight: 800; }
     .problem { position: relative; width: min(62%, 300px); justify-self: center; text-align: center; padding: 6px 4px 4px; border: 2px solid #cfd6ff; border-radius: 14px; background: linear-gradient(145deg, #fff, #f8f7ff); box-shadow: 0 8px 20px rgb(77 88 156 / 12%), 0 0 0 4px rgb(255 255 255 / 55%); }
     .problem::before, .problem::after { position: absolute; color: #ffd45e; font-size: 16px; line-height: 1; animation: sparkle 1.8s ease-in-out infinite; pointer-events: none; }
     .problem::before { content: '✦'; top: -10px; left: -13px; }
@@ -183,6 +185,8 @@
     </section>
 
     <div class="progress" aria-label="10問中の進み具合"><span id="bar"></span></div>
+    <button class="time-attack" id="time-attack" type="button">⏱ タイムアタック開始（60秒）</button>
+    <div class="time-status" id="time-status"></div>
     <section class="problem" aria-live="polite">
       <div class="stage-label" id="stage-label">全部の段</div>
       <div class="equation" id="question">3 × 4</div>
@@ -249,6 +253,8 @@
     const bar = document.querySelector('#bar');
     const selectedMode = document.querySelector('#selected-mode');
     const stageLabel = document.querySelector('#stage-label');
+    const timeAttackButton = document.querySelector('#time-attack');
+    const timeStatus = document.querySelector('#time-status');
     let left, right, entry = '', total = 0, correct = 0, point = 0, combo = 0, life = 5, locked = false, gameOver = false, selectedTable = 'all';
     let highScore = Number(localStorage.getItem(HIGH_SCORE_KEY)) || 0;
     let coins = Number(localStorage.getItem(COINS_KEY)) || 0;
@@ -271,7 +277,7 @@
     if (!ownedOutfits.includes(wornOutfit)) wornOutfit = 'default';
     let weakQuestions;
     try { weakQuestions = JSON.parse(localStorage.getItem(WEAK_QUESTIONS_KEY)) || {}; } catch { weakQuestions = {}; }
-    let recognition = null, isListening = false, restartTimer = null, previousQuestion = '';
+    let recognition = null, isListening = false, restartTimer = null, previousQuestion = '', timeAttack = false, timeLeft = 60, timeTimer = null;
 
     function tableName() {
       if (selectedTable === 'all') return '全部の段';
@@ -417,6 +423,19 @@
         playBgmNote();
         bgmTimer = setInterval(playBgmNote, 520);
       } catch { /* BGM非対応でもゲームは続行 */ }
+    }
+    function finishTimeAttack() {
+      clearInterval(timeTimer); timeTimer = null; timeAttack = false; gameOver = true; stopListening();
+      timeStatus.textContent = `タイムアップ！ ${correct}問せいかい`;
+      timeAttackButton.textContent = '⏱ もう一回タイムアタック';
+      cheerPenta(`タイムアップ！${correct}問せいかい！`, 'happy');
+    }
+    function startTimeAttack() {
+      clearInterval(timeTimer); timeAttack = true; timeLeft = 60; selectedTable = 'all';
+      document.querySelectorAll('[data-table]').forEach(item => item.classList.toggle('is-selected', item.dataset.table === 'all'));
+      selectedMode.textContent = tableName();
+      resetGame(); timeStatus.textContent = 'のこり60秒'; timeAttackButton.textContent = '⏱ タイムアタック中';
+      timeTimer = setInterval(() => { timeLeft--; timeStatus.textContent = `のこり${timeLeft}秒`; if (timeLeft <= 0) finishTimeAttack(); }, 1000);
     }
     function stopBgm() {
       bgmPlaying = false;
