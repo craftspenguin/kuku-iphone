@@ -642,6 +642,7 @@
     document.querySelector('#check').addEventListener('click', check);
     document.querySelector('#reset').addEventListener('click', resetGame);
     gachaButton.addEventListener('click', drawGacha);
+    timeAttackButton.addEventListener('click', startTimeAttack);
     musicToggle.addEventListener('click', () => bgmPlaying ? stopBgm() : startBgm());
     document.addEventListener('pointerdown', () => startBgm(), { once: true });
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
