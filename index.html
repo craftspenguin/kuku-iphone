@@ -68,6 +68,9 @@
     .coin-bank { display: flex; justify-content: center; align-items: center; gap: 6px; color: #a46e08; font-size: 18px; font-weight: 800; }
     .coin-bank span { color: #c78500; font-variant-numeric: tabular-nums; }
     .streak { margin-top: -5px; color: #e2763b; text-align: center; font-size: 13px; line-height: 13px; font-weight: 800; }
+    .achievements { display: flex; justify-content: center; gap: 4px; min-height: 22px; font-size: 17px; }
+    .achievements span { filter: grayscale(1); opacity: .35; }
+    .achievements span.unlocked { filter: none; opacity: 1; }
     .streak.streak-milestone { animation: streak-milestone .8s ease-out; }
     @keyframes streak-milestone { 35% { color: #f08a12; transform: scale(1.35); text-shadow: 0 0 14px #ffd45e; } }
     .coin-bank.coin-gain { animation: coin-gain .55s ease-out; }
@@ -203,6 +206,7 @@
     <div class="actions"><button type="button" class="submit" id="check">こたえる</button><button type="button" class="reset" id="reset">はじめから</button></div>
     <div class="coin-bank" aria-label="コイン"><span aria-hidden="true">🪙</span> コイン <span id="coins">0</span></div>
     <div class="streak" id="streak">🔥 0日</div>
+    <div class="achievements" id="achievements" aria-label="実績バッジ"></div>
     <section class="gacha" aria-labelledby="gacha-title">
       <h2 id="gacha-title">ぺんたのきせかえガチャ</h2>
       <p>コイン10枚で新しいアイテムを1つゲット！</p>
@@ -223,6 +227,7 @@
     const voiceStatus = document.querySelector('#voice-status');
     const coinsLabel = document.querySelector('#coins');
     const streakLabel = document.querySelector('#streak');
+    const achievementsLabel = document.querySelector('#achievements');
     const coinBank = document.querySelector('.coin-bank');
     const levelLabel = document.querySelector('#level');
     const xpLabel = document.querySelector('#xp');
@@ -249,6 +254,8 @@
     const DAILY_BONUS_KEY = 'kuku-dx-daily-bonus';
     const STREAK_KEY = 'kuku-dx-streak';
     const STREAK_DATE_KEY = 'kuku-dx-streak-date';
+    const ACHIEVEMENTS_KEY = 'kuku-dx-achievements';
+    const TOTAL_CORRECT_KEY = 'kuku-dx-total-correct';
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const bar = document.querySelector('#bar');
     const selectedMode = document.querySelector('#selected-mode');
@@ -278,6 +285,11 @@
     let weakQuestions;
     try { weakQuestions = JSON.parse(localStorage.getItem(WEAK_QUESTIONS_KEY)) || {}; } catch { weakQuestions = {}; }
     let recognition = null, isListening = false, restartTimer = null, previousQuestion = '', timeAttack = false, timeLeft = 60, timeTimer = null;
+    const achievementList = [
+      ['first', '🌟', 'はじめて正解'], ['ten', '🏅', '10問正解'], ['combo', '🔥', '10コンボ'], ['streak', '📅', '3日れんぞく'], ['hundred', '👑', '100問正解']
+    ];
+    let unlockedAchievements;
+    try { unlockedAchievements = JSON.parse(localStorage.getItem(ACHIEVEMENTS_KEY)) || []; } catch { unlockedAchievements = []; }
 
     function tableName() {
       if (selectedTable === 'all') return '全部の段';
@@ -384,6 +396,21 @@
         flashStreak();
         celebrateCorrect();
       }
+      if (streak >= 3) unlockAchievement('streak');
+    }
+    function unlockAchievement(id) {
+      if (unlockedAchievements.includes(id)) return;
+      unlockedAchievements.push(id);
+      localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(unlockedAchievements));
+      renderAchievements();
+    }
+    function renderAchievements() {
+      achievementsLabel.replaceChildren(...achievementList.map(([id, icon, name]) => {
+        const badge = document.createElement('span');
+        badge.textContent = icon; badge.title = unlockedAchievements.includes(id) ? name : '？？？';
+        badge.classList.toggle('unlocked', unlockedAchievements.includes(id));
+        return badge;
+      }));
     }
     function applySeason() {
       const month = new Date().getMonth() + 1;
@@ -597,6 +624,12 @@
       stopListening();
       if (Number(entry) === left * right) {
         correct++; point += 10; combo++; coins += 5; improveWeakQuestion(); localStorage.setItem(COINS_KEY, coins);
+        const totalCorrect = (Number(localStorage.getItem(TOTAL_CORRECT_KEY)) || 0) + 1;
+        localStorage.setItem(TOTAL_CORRECT_KEY, totalCorrect);
+        unlockAchievement('first');
+        if (correct >= 10) unlockAchievement('ten');
+        if (combo >= 10) unlockAchievement('combo');
+        if (totalCorrect >= 100) unlockAchievement('hundred');
         flashCoins();
         const comboLifeBonus = combo % 10 === 0;
         if (comboLifeBonus) life++;
@@ -648,6 +681,7 @@
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
     applySeason();
     updateStreak();
+    renderAchievements();
     claimDailyBonus();
     renderScore(); next();
   </script>
