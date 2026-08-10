@@ -72,6 +72,7 @@
     .achievements span { filter: grayscale(1); opacity: .35; }
     .achievements span.unlocked { filter: none; opacity: 1; }
     .penta-book { color: #6e62b8; text-align: center; font-size: 12px; font-weight: 800; }
+    .diary { color: #69708d; text-align: center; font-size: 11px; font-style: italic; }
     .streak.streak-milestone { animation: streak-milestone .8s ease-out; }
     @keyframes streak-milestone { 35% { color: #f08a12; transform: scale(1.35); text-shadow: 0 0 14px #ffd45e; } }
     .coin-bank.coin-gain { animation: coin-gain .55s ease-out; }
@@ -213,6 +214,7 @@
     <div class="streak" id="streak">🔥 0日</div>
     <div class="achievements" id="achievements" aria-label="実績バッジ"></div>
     <div class="penta-book" id="penta-book">📖 ぺんた図鑑 0/0</div>
+    <div class="diary" id="diary">📔 ぺんた日記を開いているよ</div>
     <section class="gacha" aria-labelledby="gacha-title">
       <h2 id="gacha-title">ぺんたのきせかえガチャ</h2>
       <p>コイン10枚で新しいアイテムを1つゲット！</p>
@@ -235,6 +237,7 @@
     const streakLabel = document.querySelector('#streak');
     const achievementsLabel = document.querySelector('#achievements');
     const pentaBookLabel = document.querySelector('#penta-book');
+    const diaryLabel = document.querySelector('#diary');
     const coinBank = document.querySelector('.coin-bank');
     const levelLabel = document.querySelector('#level');
     const xpLabel = document.querySelector('#xp');
@@ -263,6 +266,7 @@
     const STREAK_DATE_KEY = 'kuku-dx-streak-date';
     const ACHIEVEMENTS_KEY = 'kuku-dx-achievements';
     const TOTAL_CORRECT_KEY = 'kuku-dx-total-correct';
+    const DIARY_KEY = 'kuku-dx-diary';
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const bar = document.querySelector('#bar');
     const selectedMode = document.querySelector('#selected-mode');
@@ -424,6 +428,18 @@
     }
     function renderPentaBook() {
       pentaBookLabel.textContent = `📖 ぺんた図鑑 ${ownedOutfits.length}/${outfits.length}`;
+    }
+    function updateDiary() {
+      const now = new Date();
+      const today = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+      let diary;
+      try { diary = JSON.parse(localStorage.getItem(DIARY_KEY)) || []; } catch { diary = []; }
+      if (!diary.some(entry => entry.date === today)) {
+        diary.push({ date: today, text: diary.length ? '今日もぺんたに会いにきてくれたね！' : 'はじめての日記だよ。これからよろしくね！' });
+        localStorage.setItem(DIARY_KEY, JSON.stringify(diary.slice(-30)));
+      }
+      const latest = diary[diary.length - 1];
+      if (latest) diaryLabel.textContent = `📔 ${latest.date}　${latest.text}`;
     }
     function applySeason() {
       const month = new Date().getMonth() + 1;
@@ -710,6 +726,7 @@
     applySeason();
     updateStreak();
     renderAchievements();
+    updateDiary();
     claimDailyBonus();
     renderScore(); next();
   </script>
