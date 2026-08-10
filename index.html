@@ -98,6 +98,7 @@
     .time-attack { min-height: 38px; width: 100%; margin-top: 7px; border-radius: 12px; background: #fff0d8; border-color: #f0c477; color: #9b640e; font-size: 14px; }
     .time-status { min-height: 18px; color: #c26b22; text-align: center; font-size: 13px; font-weight: 800; }
     .daily-challenge { min-height: 34px; width: 100%; margin-top: 4px; border-radius: 10px; background: #e9f8ff; border-color: #9ed8ed; color: #28758f; font-size: 13px; }
+    .weak-time-attack { min-height: 32px; width: 100%; margin-top: 4px; border-radius: 10px; background: #fff4df; border-color: #f0ca7a; color: #985d00; font-size: 12px; }
     .problem { position: relative; width: min(62%, 300px); justify-self: center; text-align: center; padding: 6px 4px 4px; border: 2px solid #cfd6ff; border-radius: 14px; background: linear-gradient(145deg, #fff, #f8f7ff); box-shadow: 0 8px 20px rgb(77 88 156 / 12%), 0 0 0 4px rgb(255 255 255 / 55%); }
     .problem::before, .problem::after { position: absolute; color: #ffd45e; font-size: 16px; line-height: 1; animation: sparkle 1.8s ease-in-out infinite; pointer-events: none; }
     .problem::before { content: '✦'; top: -10px; left: -13px; }
@@ -193,6 +194,7 @@
     <button class="time-attack" id="time-attack" type="button" onclick="startTimeAttack()">⏱ タイムアタック開始（60秒）</button>
     <div class="time-status" id="time-status"></div>
     <button class="daily-challenge" id="daily-challenge" type="button">🌟 今日の特別問題</button>
+    <button class="weak-time-attack" id="weak-time-attack" type="button">🔥 苦手だけタイムアタック</button>
     <section class="problem" aria-live="polite">
       <div class="stage-label" id="stage-label">全部の段</div>
       <div class="equation" id="question">3 × 4</div>
@@ -268,6 +270,7 @@
     const timeAttackButton = document.querySelector('#time-attack');
     const timeStatus = document.querySelector('#time-status');
     const dailyChallengeButton = document.querySelector('#daily-challenge');
+    const weakTimeAttackButton = document.querySelector('#weak-time-attack');
     let left, right, entry = '', total = 0, correct = 0, point = 0, combo = 0, life = 5, locked = false, gameOver = false, selectedTable = 'all';
     let highScore = Number(localStorage.getItem(HIGH_SCORE_KEY)) || 0;
     let coins = Number(localStorage.getItem(COINS_KEY)) || 0;
@@ -467,11 +470,11 @@
       timeAttackButton.textContent = '⏱ もう一回タイムアタック';
       cheerPenta(`タイムアップ！${correct}問せいかい！`, 'happy');
     }
-    function startTimeAttack() {
-      clearInterval(timeTimer); timeAttack = true; timeLeft = 60; selectedTable = 'all';
-      document.querySelectorAll('[data-table]').forEach(item => item.classList.toggle('is-selected', item.dataset.table === 'all'));
+    function startTimeAttack(table = 'all') {
+      clearInterval(timeTimer); timeAttack = true; timeLeft = 60; selectedTable = table;
+      document.querySelectorAll('[data-table]').forEach(item => item.classList.toggle('is-selected', item.dataset.table === table));
       selectedMode.textContent = tableName();
-      resetGame(); timeStatus.textContent = 'のこり60秒'; timeAttackButton.textContent = '⏱ タイムアタック中';
+      resetGame(); timeStatus.textContent = 'のこり60秒'; timeAttackButton.textContent = table === 'weak' ? '⏱ 苦手タイムアタック中' : '⏱ タイムアタック中';
       timeTimer = setInterval(() => { timeLeft--; timeStatus.textContent = `のこり${timeLeft}秒`; if (timeLeft <= 0) finishTimeAttack(); }, 1000);
     }
     function startDailyChallenge() {
@@ -699,6 +702,7 @@
     document.querySelector('#reset').addEventListener('click', resetGame);
     gachaButton.addEventListener('click', drawGacha);
     timeAttackButton.addEventListener('click', startTimeAttack);
+    weakTimeAttackButton.addEventListener('click', () => startTimeAttack('weak'));
     dailyChallengeButton.addEventListener('click', startDailyChallenge);
     musicToggle.addEventListener('click', () => bgmPlaying ? stopBgm() : startBgm());
     document.addEventListener('pointerdown', () => startBgm(), { once: true });
