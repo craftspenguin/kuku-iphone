@@ -71,6 +71,7 @@
     .achievements { display: flex; justify-content: center; gap: 4px; min-height: 22px; font-size: 17px; }
     .achievements span { filter: grayscale(1); opacity: .35; }
     .achievements span.unlocked { filter: none; opacity: 1; }
+    .penta-book { color: #6e62b8; text-align: center; font-size: 12px; font-weight: 800; }
     .streak.streak-milestone { animation: streak-milestone .8s ease-out; }
     @keyframes streak-milestone { 35% { color: #f08a12; transform: scale(1.35); text-shadow: 0 0 14px #ffd45e; } }
     .coin-bank.coin-gain { animation: coin-gain .55s ease-out; }
@@ -207,6 +208,7 @@
     <div class="coin-bank" aria-label="コイン"><span aria-hidden="true">🪙</span> コイン <span id="coins">0</span></div>
     <div class="streak" id="streak">🔥 0日</div>
     <div class="achievements" id="achievements" aria-label="実績バッジ"></div>
+    <div class="penta-book" id="penta-book">📖 ぺんた図鑑 0/0</div>
     <section class="gacha" aria-labelledby="gacha-title">
       <h2 id="gacha-title">ぺんたのきせかえガチャ</h2>
       <p>コイン10枚で新しいアイテムを1つゲット！</p>
@@ -228,6 +230,7 @@
     const coinsLabel = document.querySelector('#coins');
     const streakLabel = document.querySelector('#streak');
     const achievementsLabel = document.querySelector('#achievements');
+    const pentaBookLabel = document.querySelector('#penta-book');
     const coinBank = document.querySelector('.coin-bank');
     const levelLabel = document.querySelector('#level');
     const xpLabel = document.querySelector('#xp');
@@ -412,6 +415,9 @@
         return badge;
       }));
     }
+    function renderPentaBook() {
+      pentaBookLabel.textContent = `📖 ぺんた図鑑 ${ownedOutfits.length}/${outfits.length}`;
+    }
     function applySeason() {
       const month = new Date().getMonth() + 1;
       const season = month >= 3 && month <= 5 ? 'spring' : month >= 6 && month <= 8 ? 'summer' : month >= 9 && month <= 11 ? 'autumn' : 'winter';
@@ -505,6 +511,7 @@
       playTone(220, 0.22, 'triangle', 0.08);
     }
     function renderWardrobe() {
+      renderPentaBook();
       penta.dataset.outfit = wornOutfit;
       wardrobe.replaceChildren(...outfits.filter(outfit => ownedOutfits.includes(outfit.id)).map(outfit => {
         const button = document.createElement('button');
