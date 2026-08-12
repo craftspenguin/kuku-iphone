@@ -73,6 +73,7 @@
     .achievements span.unlocked { filter: none; opacity: 1; }
     .penta-book { color: #6e62b8; text-align: center; font-size: 12px; font-weight: 800; }
     .diary { color: #69708d; text-align: center; font-size: 11px; font-style: italic; }
+    .daily-gift { min-height: 32px; width: 100%; border-radius: 10px; background: #fff2c7; border-color: #edc968; color: #8d6812; font-size: 13px; }
     .streak.streak-milestone { animation: streak-milestone .8s ease-out; }
     @keyframes streak-milestone { 35% { color: #f08a12; transform: scale(1.35); text-shadow: 0 0 14px #ffd45e; } }
     .coin-bank.coin-gain { animation: coin-gain .55s ease-out; }
@@ -215,6 +216,7 @@
     <div class="achievements" id="achievements" aria-label="実績バッジ"></div>
     <div class="penta-book" id="penta-book">📖 ぺんた図鑑 0/0</div>
     <div class="diary" id="diary">📔 ぺんた日記を開いているよ</div>
+    <button class="daily-gift" id="daily-gift" type="button">🎁 今日のプレゼントをもらう</button>
     <section class="gacha" aria-labelledby="gacha-title">
       <h2 id="gacha-title">ぺんたのきせかえガチャ</h2>
       <p>コイン10枚で新しいアイテムを1つゲット！</p>
@@ -238,6 +240,7 @@
     const achievementsLabel = document.querySelector('#achievements');
     const pentaBookLabel = document.querySelector('#penta-book');
     const diaryLabel = document.querySelector('#diary');
+    const dailyGiftButton = document.querySelector('#daily-gift');
     const coinBank = document.querySelector('.coin-bank');
     const levelLabel = document.querySelector('#level');
     const xpLabel = document.querySelector('#xp');
@@ -267,6 +270,7 @@
     const ACHIEVEMENTS_KEY = 'kuku-dx-achievements';
     const TOTAL_CORRECT_KEY = 'kuku-dx-total-correct';
     const DIARY_KEY = 'kuku-dx-diary';
+    const DAILY_GIFT_KEY = 'kuku-dx-daily-gift';
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const bar = document.querySelector('#bar');
     const selectedMode = document.querySelector('#selected-mode');
@@ -440,6 +444,37 @@
       }
       const latest = diary[diary.length - 1];
       if (latest) diaryLabel.textContent = `📔 ${latest.date}　${latest.text}`;
+    }
+    function claimDailyGift() {
+      const now = new Date();
+      const today = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+      if (localStorage.getItem(DAILY_GIFT_KEY) === today) {
+        dailyGiftButton.textContent = '🎁 今日のプレゼントは受け取りずみ';
+        return;
+      }
+      const pool = outfits.filter(outfit => !ownedOutfits.includes(outfit.id));
+      const roll = Math.random();
+      let message;
+      if (pool.length && roll > .72) {
+        const item = pool[Math.floor(Math.random() * pool.length)];
+        ownedOutfits.push(item.id); wornOutfit = item.id;
+        localStorage.setItem(OUTFITS_KEY, JSON.stringify(ownedOutfits));
+        localStorage.setItem(WORN_OUTFIT_KEY, wornOutfit);
+        message = `プレゼントは${item.name}！`;
+      } else if (roll > .35) {
+        coins += 15;
+        localStorage.setItem(COINS_KEY, coins);
+        message = 'プレゼントはコイン15枚！';
+        flashCoins();
+      } else {
+        addExperience(20);
+        message = 'プレゼントは20EXP！';
+      }
+      localStorage.setItem(DAILY_GIFT_KEY, today);
+      dailyGiftButton.textContent = '🎁 今日のプレゼントは受け取りずみ';
+      cheerPenta(`${message} また明日ね！`, 'happy');
+      renderScore();
+      celebrateCorrect();
     }
     function applySeason() {
       const month = new Date().getMonth() + 1;
