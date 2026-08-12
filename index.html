@@ -755,6 +755,7 @@
     timeAttackButton.addEventListener('click', startTimeAttack);
     weakTimeAttackButton.addEventListener('click', () => startTimeAttack('weak'));
     dailyChallengeButton.addEventListener('click', startDailyChallenge);
+    dailyGiftButton.addEventListener('click', claimDailyGift);
     musicToggle.addEventListener('click', () => bgmPlaying ? stopBgm() : startBgm());
     document.addEventListener('pointerdown', () => startBgm(), { once: true });
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
