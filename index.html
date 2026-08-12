@@ -274,6 +274,7 @@
     const TOTAL_CORRECT_KEY = 'kuku-dx-total-correct';
     const DIARY_KEY = 'kuku-dx-diary';
     const DAILY_GIFT_KEY = 'kuku-dx-daily-gift';
+    const IDLE_COINS_TIME_KEY = 'kuku-dx-idle-coins-time';
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const bar = document.querySelector('#bar');
     const selectedMode = document.querySelector('#selected-mode');
@@ -482,6 +483,23 @@
       dailyGiftButton.textContent = '🎁 今日のプレゼントは受け取りずみ';
       cheerPenta(`${message} また明日ね！`, 'happy');
       renderScore();
+      celebrateCorrect();
+    }
+    function claimIdleCoins() {
+      const now = Date.now();
+      const saved = Number(localStorage.getItem(IDLE_COINS_TIME_KEY));
+      if (!saved) {
+        localStorage.setItem(IDLE_COINS_TIME_KEY, String(now));
+        return;
+      }
+      const minutes = Math.floor((now - saved) / 60000);
+      if (minutes <= 0) return;
+      const earned = minutes * 10;
+      coins += earned;
+      localStorage.setItem(COINS_KEY, coins);
+      localStorage.setItem(IDLE_COINS_TIME_KEY, String(saved + minutes * 60000));
+      cheerPenta(`おかえり！${earned}枚もらったよ！`, 'happy');
+      flashCoins();
       celebrateCorrect();
     }
     function applySeason() {
@@ -774,7 +792,11 @@
     updateDiary();
     updateRank();
     claimDailyBonus();
+    claimIdleCoins();
     renderScore(); next();
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') { claimIdleCoins(); renderScore(); }
+    });
   </script>
 </body>
 </html>
