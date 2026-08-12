@@ -73,6 +73,7 @@
     .achievements span.unlocked { filter: none; opacity: 1; }
     .penta-book { color: #6e62b8; text-align: center; font-size: 12px; font-weight: 800; }
     .diary { color: #69708d; text-align: center; font-size: 11px; font-style: italic; }
+    .rank { color: #7658b5; text-align: center; font-size: 12px; font-weight: 800; }
     .daily-gift { min-height: 32px; width: 100%; border-radius: 10px; background: #fff2c7; border-color: #edc968; color: #8d6812; font-size: 13px; }
     .streak.streak-milestone { animation: streak-milestone .8s ease-out; }
     @keyframes streak-milestone { 35% { color: #f08a12; transform: scale(1.35); text-shadow: 0 0 14px #ffd45e; } }
@@ -216,6 +217,7 @@
     <div class="achievements" id="achievements" aria-label="実績バッジ"></div>
     <div class="penta-book" id="penta-book">📖 ぺんた図鑑 0/0</div>
     <div class="diary" id="diary">📔 ぺんた日記を開いているよ</div>
+    <div class="rank" id="rank">🏆 九九見習い</div>
     <button class="daily-gift" id="daily-gift" type="button">🎁 今日のプレゼントをもらう</button>
     <section class="gacha" aria-labelledby="gacha-title">
       <h2 id="gacha-title">ぺんたのきせかえガチャ</h2>
@@ -240,6 +242,7 @@
     const achievementsLabel = document.querySelector('#achievements');
     const pentaBookLabel = document.querySelector('#penta-book');
     const diaryLabel = document.querySelector('#diary');
+    const rankLabel = document.querySelector('#rank');
     const dailyGiftButton = document.querySelector('#daily-gift');
     const coinBank = document.querySelector('.coin-bank');
     const levelLabel = document.querySelector('#level');
@@ -444,6 +447,11 @@
       }
       const latest = diary[diary.length - 1];
       if (latest) diaryLabel.textContent = `📔 ${latest.date}　${latest.text}`;
+    }
+    function updateRank() {
+      const totalCorrect = Number(localStorage.getItem(TOTAL_CORRECT_KEY)) || 0;
+      const rank = totalCorrect >= 100 ? '🏆 九九マスター' : totalCorrect >= 30 ? '🥇 九九名人' : '🌱 九九見習い';
+      rankLabel.textContent = `${rank}　（${totalCorrect}問）`;
     }
     function claimDailyGift() {
       const now = new Date();
@@ -703,6 +711,7 @@
         correct++; point += 10; combo++; coins += 5; improveWeakQuestion(); localStorage.setItem(COINS_KEY, coins);
         const totalCorrect = (Number(localStorage.getItem(TOTAL_CORRECT_KEY)) || 0) + 1;
         localStorage.setItem(TOTAL_CORRECT_KEY, totalCorrect);
+        updateRank();
         unlockAchievement('first');
         if (correct >= 10) unlockAchievement('ten');
         if (combo >= 10) unlockAchievement('combo');
@@ -763,6 +772,7 @@
     updateStreak();
     renderAchievements();
     updateDiary();
+    updateRank();
     claimDailyBonus();
     renderScore(); next();
   </script>
