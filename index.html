@@ -127,8 +127,9 @@
     .submit { display: none; }
     .submit { background: var(--main); color: #fff; border-color: var(--main); }
     .reset { font-size: 16px; }
-    @media (max-height: 820px) {
-      main { padding-top: max(8px, env(safe-area-inset-top)); padding-bottom: max(8px, env(safe-area-inset-bottom)); gap: 6px; align-content: start; }
+    @media (max-height: 900px) {
+      body { overflow: hidden; }
+      main { min-height: 100dvh; height: 100dvh; overflow: hidden; padding-top: max(4px, env(safe-area-inset-top)); padding-bottom: max(4px, env(safe-area-inset-bottom)); gap: 3px; align-content: start; }
       .penta-card { padding: 5px 9px; gap: 8px; }
       .penta { width: 48px; height: 48px; flex-basis: 48px; }
       .penta::before { inset: 11px 8px 6px; }
@@ -138,6 +139,10 @@
       .penta-ribbon { top: -3px; right: 6px; width: 16px; height: 9px; }
       .penta-scarf { right: 4px; bottom: 5px; left: 4px; height: 6px; }
       .penta-message { font-size: 12px; }
+      .title { font-size: 16px; }
+      .game-stats, .level-status { font-size: 11px; }
+      .achievements { min-height: 18px; font-size: 14px; }
+      .penta-book, .rank, .diary { font-size: 10px; line-height: 11px; }
       .mode { padding: 7px; }
       .mode-title { margin-bottom: 5px; font-size: 13px; }
       .mode-buttons { gap: 4px; }
@@ -149,6 +154,7 @@
       .answer { min-height: 30px; margin-top: 2px; font-size: 24px; }
       .feedback { min-height: 18px; margin-top: 2px; font-size: 13px; }
       .voice-status { min-height: 16px; font-size: 11px; }
+      .time-attack, .daily-challenge, .weak-time-attack, .daily-gift { min-height: 26px; margin-top: 2px; font-size: 11px; }
       .actions { gap: 5px; }
       .reset { min-height: 36px; font-size: 13px; }
       .gacha { padding: 7px; }
