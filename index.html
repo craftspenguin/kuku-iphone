@@ -492,12 +492,12 @@
         localStorage.setItem(IDLE_COINS_TIME_KEY, String(now));
         return;
       }
-      const minutes = Math.floor((now - saved) / 60000);
-      if (minutes <= 0) return;
-      const earned = minutes * 10;
+      const hours = Math.floor((now - saved) / 3600000);
+      if (hours <= 0) return;
+      const earned = hours * 10;
       coins += earned;
       localStorage.setItem(COINS_KEY, coins);
-      localStorage.setItem(IDLE_COINS_TIME_KEY, String(saved + minutes * 60000));
+      localStorage.setItem(IDLE_COINS_TIME_KEY, String(saved + hours * 3600000));
       cheerPenta(`おかえり！${earned}枚もらったよ！`, 'happy');
       flashCoins();
       celebrateCorrect();
